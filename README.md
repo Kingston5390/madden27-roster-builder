@@ -7,17 +7,21 @@
 
 A free desktop app for building and editing **Madden NFL 27** rosters on PC. Pick any team, drop any player in the league into any slot, change ratings, height, weight and development trait, pull in all-time legends, sync with the real NFL, and export a roster file Madden loads like any other.
 
-![Lineup builder: the all-time Giants](docs/builder-alltime-giants.jpg)
+![Lineup builder: the all-time Giants](docs/builder-alltime-giants.png)
 
 ## Screenshots
 
 | Choose a conference | Choose a team |
 |---|---|
-| ![Conference select](docs/conference-select.jpg) | ![Team select](docs/team-select.jpg) |
+| ![Conference select](docs/conference-select.png) | ![Team select](docs/team-select.png) |
 
-| Edit any player |
+| Edit any player (and upload a photo) | Add anyone, including legends |
+|---|---|
+| ![Player editor](docs/player-editor.png) | ![Legend search](docs/legend-search.png) |
+
+| League chaos |
 |---|
-| ![Player editor](docs/player-editor.jpg) |
+| ![League chaos](docs/league-chaos.png) |
 
 ## What it does
 
@@ -30,6 +34,7 @@ A free desktop app for building and editing **Madden NFL 27** rosters on PC. Pic
 **Edit players**
 - Every rating (0–99), overall, height (up to 10'7", body size included), weight, age, jersey number, name, and development trait (Normal, Star, Superstar, X-Factor).
 - Max all to 99, swap for the best player at a position, replace or remove.
+- **Upload your own photo** for any player (PNG, JPG or WebP), great for custom players. Photos are saved on your PC and show on cards, in search and in the editor. They appear in this app only: Madden's in-game faces are 3D head models a roster file can't replace.
 
 **Quick buttons**
 - Best team, All 99, All 0, All X-Factor, Clear.
@@ -57,9 +62,11 @@ The All-time team button and legend search read legends from any roster in your 
 
 ## Security & verification
 
-**Scan result (v1.0.0):** Microsoft Defender Antivirus, engine 1.1.26100.4, signatures 1.463.110.0 (Nov 3, 2026), custom scan of `RosterBuilder.exe`: **no threats found**.
+**Scan result (v1.1.0):** Microsoft Defender Antivirus, engine 1.1.26100.4, signatures 1.463.121.0 (Nov 4, 2026), custom scan of `RosterBuilder.exe`: **no threats found**.
 
-**SHA-256 (v1.0.0):** `cd5f2a50a9f19f491ce125517a7dff1eaee2376b146e11817e7fb7e97b512958`
+**SHA-256 (v1.1.0):** `07faa02c3d14e745623e9d559cae34ed6749c0bc8801804c0eaafb0c628351e5`
+
+Each release lists its own scan result and checksum.
 
 Check your download matches, in PowerShell:
 
@@ -72,6 +79,7 @@ Get-FileHash .\RosterBuilder.exe -Algorithm SHA256
 **What it does on your PC:**
 - Runs a local web server on `127.0.0.1` (not reachable from other computers) and opens the UI in a browser window.
 - Reads roster files in your Madden saves folder and writes **new** roster files there. It doesn't modify existing rosters or any game files.
+- Photos you upload, plus cached legend photos, are stored in `%APPDATA%\RosterBuilder`.
 - Connects only to ESPN (rosters, injuries, headshots, logos) and Wikipedia (legend photos).
 
 The exe isn't code-signed, so Windows SmartScreen may show "Windows protected your PC" on first run. Choose **More info → Run anyway**.
