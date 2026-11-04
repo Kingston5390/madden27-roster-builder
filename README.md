@@ -2,6 +2,9 @@
 
 **Made by ywkrlerche**
 
+[![Download RosterBuilder.exe](https://img.shields.io/badge/Download-RosterBuilder.exe-1fa463?style=for-the-badge&logo=windows&logoColor=white)](https://github.com/Kingston5390/madden27-roster-builder/releases/latest/download/RosterBuilder.exe)
+[![Latest release](https://img.shields.io/github/v/release/Kingston5390/madden27-roster-builder?style=for-the-badge&label=Release)](https://github.com/Kingston5390/madden27-roster-builder/releases/latest)
+
 A free desktop app for building and editing **Madden NFL 27** rosters on PC. Pick any team, drop any player in the league into any slot, change ratings, height, weight and development trait, pull in all-time legends, sync with the real NFL, and export a roster file Madden loads like any other.
 
 ![Lineup builder: the all-time Giants](docs/builder-alltime-giants.jpg)
@@ -44,7 +47,7 @@ Also: sound effects (with a mute button), animations and a loading screen.
 
 ## Download and run
 
-1. Download `RosterBuilder.exe` from the [Releases](../../releases) page.
+1. [Download `RosterBuilder.exe`](https://github.com/Kingston5390/madden27-roster-builder/releases/latest/download/RosterBuilder.exe) (always the latest version, also on the [Releases](../../releases) page).
 2. Double-click it. It finds your saves folder (`Documents\Madden NFL 27\saves`) and opens in its own window. A small console window stays open; close it to quit.
 
 Player photos, team logos and NFL sync need an internet connection. Building, editing and exporting work offline.
