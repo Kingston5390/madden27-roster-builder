@@ -1,0 +1,6 @@
+# build output (the exe ships as a GitHub Release, not in the repo)
+dist/
+node_modules/
+# roster files never belong in the repo
+ROSTER-*
+*.log
