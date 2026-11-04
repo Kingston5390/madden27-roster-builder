@@ -52,23 +52,26 @@ Player photos, team logos and NFL sync need an internet connection. Building, ed
 ### Legends
 The All-time team button and legend search read legends from any roster in your saves folder with **"Legends"** in its name (for example a community legends roster). Legends are copied into your export with their face models. Photos for legends come from ESPN or Wikipedia.
 
-## Is it a virus? No.
+## Security & verification
 
-Windows will probably show **"Windows protected your PC"** the first time you run it. That's SmartScreen warning about any new program that isn't code-signed. Signing certificates cost money, and this is a free fan project. Click **More info → Run anyway**.
+**Scan result (v1.0.0):** Microsoft Defender Antivirus, engine 1.1.26100.4, signatures 1.463.110.0 (Nov 3, 2026), custom scan of `RosterBuilder.exe`: **no threats found**.
 
-What the exe actually is:
-- A copy of the official **Node.js** runtime with this app's code bundled inside ([Node single executable application](https://nodejs.org/api/single-executable-applications.html)). Everything it runs is the source in this repository.
-- It starts a small web server on `127.0.0.1` (your own PC only) and opens the UI in a browser window.
-- It reads roster files in your Madden saves folder and only ever **writes new roster files** there. It doesn't change your existing rosters or game files.
-- Its only internet requests go to ESPN (rosters, injuries, headshots, logos) and Wikipedia (legend photos).
+**SHA-256 (v1.0.0):** `cd5f2a50a9f19f491ce125517a7dff1eaee2376b146e11817e7fb7e97b512958`
 
-You can check the download is the published build with its SHA-256 checksum, listed on each release. In PowerShell:
+Check your download matches, in PowerShell:
 
 ```powershell
 Get-FileHash .\RosterBuilder.exe -Algorithm SHA256
 ```
 
-Or build it yourself (below) and you know exactly what's in it.
+**What the exe contains:** the official **Node.js** runtime with this repository's code bundled inside ([Node single executable application](https://nodejs.org/api/single-executable-applications.html)). You can build the same thing from source (below).
+
+**What it does on your PC:**
+- Runs a local web server on `127.0.0.1` (not reachable from other computers) and opens the UI in a browser window.
+- Reads roster files in your Madden saves folder and writes **new** roster files there. It doesn't modify existing rosters or any game files.
+- Connects only to ESPN (rosters, injuries, headshots, logos) and Wikipedia (legend photos).
+
+The exe isn't code-signed, so Windows SmartScreen may show "Windows protected your PC" on first run. Choose **More info → Run anyway**.
 
 ## Build from source
 
