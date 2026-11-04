@@ -56,6 +56,30 @@ async function loadHeadshots() {
   return headshots;
 }
 
+// Custom player photos uploaded in the app, keyed by normalized player name (shown in the app only; Madden faces are game assets)
+const PHOTO_DIR = path.join(process.env.APPDATA || os.homedir(), 'RosterBuilder', 'custom-photos');
+const PHOTO_TYPES = { png: 'image/png', jpg: 'image/jpeg', webp: 'image/webp' };
+function customPhotos() {
+  if (!fs.existsSync(PHOTO_DIR)) return {};
+  const out = {};
+  for (const f of fs.readdirSync(PHOTO_DIR)) {
+    const m = /^([a-z]+)\.(png|jpg|webp)$/.exec(f); if (!m) continue;
+    out[m[1]] = `/photos/${f}?v=${Math.round(fs.statSync(path.join(PHOTO_DIR, f)).mtimeMs)}`;
+  }
+  return out;
+}
+function saveCustomPhoto(name, dataUrl) {
+  const key = normName(name); if (!key) throw new Error('player has no name');
+  fs.mkdirSync(PHOTO_DIR, { recursive: true });
+  for (const ext of Object.keys(PHOTO_TYPES)) fs.rmSync(path.join(PHOTO_DIR, `${key}.${ext}`), { force: true });
+  if (!dataUrl) return; // removal
+  const m = /^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/=]+)$/.exec(dataUrl);
+  if (!m) throw new Error('Pick a PNG, JPG or WebP image');
+  const bytes = Buffer.from(m[2], 'base64');
+  if (bytes.length > 5e6) throw new Error('Image is too large (5 MB max)');
+  fs.writeFileSync(path.join(PHOTO_DIR, `${key}.${m[1] === 'jpeg' ? 'jpg' : m[1]}`), bytes);
+}
+
 // Madden lists a roster by the text after the last dash in its file name, so new names are letters and digits only
 function rosterPath(raw) {
   const name = String(raw ?? '').replace(/^ROSTER-/i, '').replace(/[^A-Za-z0-9]/g, '').slice(0, 24);
@@ -113,6 +137,19 @@ const server = http.createServer(async (req, res) => {
       const legends = legendsFile();
       const result = exportRoster(path.join(savesDir, path.basename(body.base)), out, { ...body, legendsFile: legends && path.join(savesDir, legends) });
       return send(res, 200, JSON.stringify({ ...result, file: path.basename(out) }));
+    }
+    if (req.method === 'GET' && url.pathname === '/api/custom-photos') return send(res, 200, JSON.stringify(customPhotos()));
+    if (req.method === 'POST' && url.pathname === '/api/custom-photo') {
+      const { name, dataUrl } = await readBody(req);
+      saveCustomPhoto(name, dataUrl);
+      return send(res, 200, JSON.stringify(customPhotos()));
+    }
+    if (req.method === 'GET' && url.pathname.startsWith('/photos/')) {
+      const f = path.basename(url.pathname);
+      const ext = /\.(png|jpg|webp)$/.exec(f)?.[1];
+      const full = path.join(PHOTO_DIR, f);
+      if (!ext || !fs.existsSync(full)) return send(res, 404, 'not found', 'text/plain');
+      return send(res, 200, fs.readFileSync(full), PHOTO_TYPES[ext]);
     }
     if (req.method === 'POST' && url.pathname === '/api/legend-photos') {
       const { names } = await readBody(req);

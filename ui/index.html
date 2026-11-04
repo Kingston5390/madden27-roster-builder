@@ -88,8 +88,8 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
 .star5 .face { border: 1px solid #ffffff14; }
 .mute { min-width: 44px; }
 /* Wikipedia legend photos are full portraits, not cut-out headshots: crop them to the card */
-.card .photo[src*="wikimedia"] { left: 0; top: 0; bottom: auto; transform: none; width: 100%; height: calc(100% - 34px); object-fit: cover; object-position: center 22%; }
-.star5 .face img[src*="wikimedia"] { width: 100%; height: 100%; object-fit: cover; object-position: center 22%; }
+.card .photo[src^="/photos/"], .card .photo[src*="wikimedia"] { left: 0; top: 0; bottom: auto; transform: none; width: 100%; height: calc(100% - 34px); object-fit: cover; object-position: center 22%; }
+.star5 .face img[src^="/photos/"], .star5 .face img[src*="wikimedia"] { width: 100%; height: 100%; object-fit: cover; object-position: center 22%; }
 .funbar { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; margin-top: 14px; }
 .funbar span { color: var(--muted); font-family: var(--cond); letter-spacing: 2px; font-size: 12px; margin-right: 4px; }
 .funbar .btn { padding: 5px 11px; font-size: 12px; border-radius: 16px; }
@@ -200,7 +200,9 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
 .shade { position: fixed; inset: 0; background: #000a; display: none; z-index: 10; backdrop-filter: blur(2px); }
 .shade.on { display: block; animation: fadeIn .2s both; }
 .modal { position: fixed; top: 6vh; left: 50%; transform: translateX(-50%); width: min(840px, 94vw); max-height: 86vh; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; z-index: 11; display: none; flex-direction: column; box-shadow: 0 30px 80px #000c; }
-.modal.on { display: flex; animation: fadeUp .25s both; }
+.modal.on { display: flex; animation: modalIn .25s both; }
+/* keeps the modal's horizontal centering while it slides in */
+@keyframes modalIn { from { opacity: 0; transform: translate(-50%, 16px); } to { opacity: 1; transform: translate(-50%, 0); } }
 .modal header { display: flex; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line); align-items: center; flex-wrap: wrap; }
 .modal header h2 { margin: 0 12px 0 0; font-size: 22px; font-weight: 400; }
 .modal .list { overflow: auto; padding: 6px 8px 10px; }
@@ -486,6 +488,7 @@ async function boot() {
       splash(40, 'Reading ' + $('#rosterSel').value + '…');
       await loadRoster($('#rosterSel').value);
       splash(80, 'Loading player photos…');
+      await loadCustomPhotos();
       await Promise.race([loadPhotos(), new Promise(r => setTimeout(r, 4000))]);
     }
   } catch (e) { toast(e.message, true); }
@@ -761,6 +764,13 @@ function renderEditor() {
         <small>ft / in · up to 10'7"</small></label>
       <label class="field">Weight (lb)<input class="input" type="number" min="160" max="415" data-f="PWGT" value="${p.PWGT}"></label>
     </div>
+    <h4>Photo</h4>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button class="btn" id="photoUp">📷 Upload photo</button>
+      ${customShots[normName(`${p.PFNA} ${p.PLNA}`)] ? '<button class="btn red" id="photoDel">Remove photo</button>' : ''}
+      <input type="file" id="photoFile" accept="image/png,image/jpeg,image/webp" hidden>
+      <small style="color:var(--muted)">PNG, JPG or WebP. Shows in this app (Madden's in-game faces can't be changed by a roster file).</small>
+    </div>
     <h4>Development trait</h4>
     <div class="dev">${DEV.map((d, i) => `<button style="--c:${d.color}" class="${(p.PROL || 0) === i ? 'on' : ''}" data-dev="${i}">${d.name}</button>`).join('')}</div>
     <h4>Overall</h4>
@@ -774,6 +784,9 @@ function renderEditor() {
     <button class="btn red" id="removeBtn">Remove from ${POS[editing.s]}${editing.d + 1}</button>
     <button class="btn" id="undoBtn">Undo edits</button>
     <div class="spacer"></div><button class="btn" data-close>Done</button>`;
+  $('#photoUp').onclick = () => $('#photoFile').click();
+  $('#photoFile').onchange = e => { const f = e.target.files[0]; if (f) uploadPhoto(`${p.PFNA} ${p.PLNA}`, f); };
+  if ($('#photoDel')) $('#photoDel').onclick = () => savePhoto(`${p.PFNA} ${p.PLNA}`, null);
   $('#maxBtn').onclick = () => { for (const f of ALL_RATINGS) edit(f, 99); renderEditor(); render(); };
   $('#swapBtn').onclick = () => { const { s, d } = editing; closeAll(); openPicker(s, d); };
   $('#bestBtn').onclick = () => {
@@ -783,6 +796,29 @@ function renderEditor() {
   };
   $('#removeBtn').onclick = () => { st.slots[editing.s][editing.d] = null; save(); closeAll(); render(); };
   $('#undoBtn').onclick = () => { delete st.edits[editing.id]; save(); renderEditor(); render(); };
+}
+// shrink to at most 600px on the long side before saving; keep PNG/WebP transparency, otherwise JPEG
+function uploadPhoto(name, file) {
+  if (!/^image\/(png|jpeg|webp)$/.test(file.type)) return toast('Pick a PNG, JPG or WebP image', true);
+  const img = new Image();
+  img.onload = () => {
+    const scale = Math.min(1, 600 / Math.max(img.width, img.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    URL.revokeObjectURL(img.src);
+    savePhoto(name, file.type === 'image/jpeg' ? c.toDataURL('image/jpeg', 0.9) : c.toDataURL('image/png'));
+  };
+  img.onerror = () => toast('That image could not be read', true);
+  img.src = URL.createObjectURL(file);
+}
+async function savePhoto(name, dataUrl) {
+  try {
+    customShots = await api('/api/custom-photo', { name, dataUrl });
+    toast(dataUrl ? `Photo saved for ${name}` : `Photo removed for ${name}`);
+    if (editing) renderEditor();
+    render();
+  } catch (e) { toast(e.message, true); }
 }
 function rateHtml(p, f) {
   const v = p[f] || 0;
@@ -802,8 +838,11 @@ $('#dBody').addEventListener('click', e => { const b = e.target.closest('[data-d
 // ---- photos (ESPN headshots, matched by name) ----
 let shots = {};
 const normName = s => String(s).toLowerCase().replace(/\b(jr|sr|ii|iii|iv|v)\b\.?/g, '').replace(/[^a-z]/g, '');
+// photos you uploaded yourself win over ESPN/Wikipedia ones
+let customShots = {};
+async function loadCustomPhotos() { try { customShots = await api('/api/custom-photos'); } catch {} }
 function photo(p, cls = '') {
-  const k = normName(`${p.PFNA} ${p.PLNA}`), url = shots[k];
+  const k = normName(`${p.PFNA} ${p.PLNA}`), url = customShots[k] || shots[k];
   if (!url && p.legend) queueLegendPhoto(`${p.PFNA} ${p.PLNA}`, k);
   return url ? `<img class="${cls}" src="${esc(url)}" alt="" loading="lazy" onerror="this.remove()">` : '';
 }
