@@ -1,0 +1,18 @@
+{
+  "name": "madden27-roster-builder",
+  "version": "1.2.0",
+  "description": "Build and edit Madden NFL 27 rosters, draft classes and franchise saves on PC. Made by ywkrlerche.",
+  "private": true,
+  "license": "MIT",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build": "node build.js"
+  },
+  "dependencies": {
+    "madden-franchise": "4.4.1"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

@@ -90,6 +90,101 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
 /* Wikipedia legend photos are full portraits, not cut-out headshots: crop them to the card */
 .card .photo[src^="/photos/"], .card .photo[src*="wikimedia"] { left: 0; top: 0; bottom: auto; transform: none; width: 100%; height: calc(100% - 34px); object-fit: cover; object-position: center 22%; }
 .star5 .face img[src^="/photos/"], .star5 .face img[src*="wikimedia"] { width: 100%; height: 100%; object-fit: cover; object-position: center 22%; }
+/* intros: one is picked at random every launch */
+#intro { position: fixed; inset: 0; z-index: 60; background: #000; display: grid; place-items: center; overflow: hidden; transition: opacity .6s; cursor: pointer; }
+#intro.done { opacity: 0; pointer-events: none; }
+#intro .i-skip { position: absolute; bottom: 18px; right: 22px; color: #ffffff55; font-size: 12px; letter-spacing: 1px; z-index: 5; }
+#intro .stage { position: absolute; inset: 0; display: grid; place-items: center; }
+#intro .i-title { font-family: var(--cond); font-size: clamp(48px, 8vw, 104px); font-style: italic; letter-spacing: 2px; color: #fff; line-height: 1; text-align: center; text-shadow: 0 6px 30px #000; }
+#intro .i-title span { color: var(--blue); }
+#intro .i-tag { font-family: var(--cond); letter-spacing: 7px; text-transform: uppercase; color: #b9c8e6; font-size: clamp(12px, 1.4vw, 18px); text-align: center; margin-top: 14px; opacity: 0; animation: fadeIn .6s forwards; }
+#intro .i-by { position: absolute; bottom: 18px; left: 22px; font-family: var(--cond); letter-spacing: 3px; color: #ffffff77; font-size: 13px; }
+#intro video { width: 100%; height: 100%; object-fit: cover; background: #000; }
+@keyframes slam { 0% { transform: scale(3.2); opacity: 0; filter: blur(8px); } 55% { transform: scale(.94); opacity: 1; filter: none; } 75% { transform: scale(1.04); } 100% { transform: scale(1); opacity: 1; } }
+@keyframes shake { 0%, 100% { transform: none; } 20% { transform: translate(-9px, 5px); } 40% { transform: translate(8px, -6px); } 60% { transform: translate(-5px, -3px); } 80% { transform: translate(4px, 4px); } }
+@keyframes fly { 0% { transform: translate(-70vw, 30vh) rotate(0deg) scale(.6); } 100% { transform: translate(70vw, -35vh) rotate(1440deg) scale(1.2); } }
+@keyframes flash { 0% { opacity: 0; } 10% { opacity: 1; } 100% { opacity: .22; } }
+@keyframes rise { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
+@keyframes sweep { from { transform: translateX(-130%) skewX(-20deg); } to { transform: translateX(130%) skewX(-20deg); } }
+@keyframes wipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes coin { 0% { transform: translateY(30vh) rotateY(0deg) scale(.6); } 60% { transform: translateY(-12vh) rotateY(1800deg) scale(1.1); } 100% { transform: translateY(0) rotateY(2160deg) scale(1); } }
+@keyframes glowpulse { 0%, 100% { text-shadow: 0 0 20px #2f8bff66, 0 6px 30px #000; } 50% { text-shadow: 0 0 60px #2f8bffcc, 0 6px 30px #000; } }
+#intro .ball3 { position: absolute; width: 120px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, #a0582a, #5b2c12); box-shadow: 0 0 40px #ff9a3c55; animation: fly .9s cubic-bezier(.3, .1, .5, 1) forwards; }
+#intro .ball3::before { content: ''; position: absolute; left: 36px; right: 36px; top: 33px; height: 4px; background: #fff; }
+#intro .light { position: absolute; top: 4vh; width: 18vw; height: 18vw; border-radius: 50%; background: radial-gradient(circle, #fff 0%, #cfe3ff 22%, #6fa8ff33 55%, transparent 70%); opacity: 0; }
+#intro .bar { position: absolute; top: 0; bottom: 0; width: 60vw; animation: sweep .7s ease-in forwards; }
+#intro .coin3 { width: 170px; height: 170px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff6c8, #e2b13c 45%, #9a6a12); box-shadow: 0 0 50px #ffd66a77; display: grid; place-items: center; font-family: var(--cond); font-size: 70px; color: #7a520a; animation: coin 1.5s cubic-bezier(.2, .7, .3, 1) forwards; }
+#intro .digits { font-family: var(--cond); font-size: clamp(90px, 16vw, 220px); color: #ffcf3a; text-shadow: 0 0 30px #ffb10088; letter-spacing: 8px; background: #111; border: 4px solid #333; border-radius: 14px; padding: 0 30px; }
+.card.xf::before, .frrow.xf::before { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(115deg, transparent 35%, #ffffff3a 48%, transparent 60%); background-size: 260% 100%; animation: shine 3.2s ease-in-out infinite; }
+@keyframes shine { from { background-position: 130% 0; } to { background-position: -130% 0; } }
+.stat .ring { animation: pop .5s both; }
+/* draft board */
+.draft-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; padding: 8px 0 14px; border-bottom: 1px solid var(--line); }
+.draft-filters { display: flex; gap: 10px; margin: 16px 0; flex-wrap: wrap; }
+.board { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; }
+.prospect { position: relative; border-radius: 10px; overflow: hidden; cursor: pointer; border: 2px solid var(--dev); background: linear-gradient(160deg, color-mix(in srgb, var(--dev) 70%, #1a2236) 0%, #121a2c 65%); transition: transform .18s, box-shadow .18s; }
+.prospect:hover { transform: translateY(-4px); box-shadow: 0 14px 28px #000b; }
+.prospect .pic { aspect-ratio: 1.15; display: grid; place-items: end center; overflow: hidden; }
+.prospect .pic img { width: 100%; }
+.prospect .rank { position: absolute; top: 8px; left: 8px; font-family: var(--cond); font-size: 15px; background: #000a; padding: 1px 7px; border-radius: 5px; }
+.prospect .ovr { position: absolute; top: 8px; right: 8px; background: #0c120e; border: 2px solid #31d07a; border-radius: 6px; padding: 0 6px; font-family: var(--cond); font-size: 20px; }
+.prospect .pinfo { padding: 8px 10px 10px; background: #0b1020e6; }
+.prospect .pinfo b { display: block; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prospect .pinfo small { color: #c4cbe0; font-size: 11px; }
+.prospect.edited::after { content: 'EDITED'; position: absolute; top: 36px; right: 8px; font-size: 9px; font-weight: 800; color: #111; background: var(--superstar); padding: 1px 5px; border-radius: 3px; }
+.prospect.created::after { content: 'CREATED'; position: absolute; top: 36px; right: 8px; font-size: 9px; font-weight: 800; color: #fff; background: var(--blue); padding: 1px 5px; border-radius: 3px; }
+.np-h { margin: 18px 0 8px; color: var(--muted); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
+.npresults { display: grid; gap: 6px; margin-top: 8px; max-height: 280px; overflow: auto; }
+.npres { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 6px 10px; border-radius: 8px; background: var(--panel2); border: 1px solid var(--line); transition: border-color .15s, transform .15s; animation: fadeUp .3s both; }
+.npres:hover { border-color: var(--blue); transform: translateX(2px); }
+.npres img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: #0006; }
+.npres small { color: var(--muted); }
+.clogo { width: 26px; height: 26px; object-fit: contain; flex: none; }
+/* franchise (beta) */
+.beta { font-size: 10px; font-weight: 800; letter-spacing: 1px; color: #111; background: var(--superstar); padding: 1px 6px; border-radius: 4px; }
+.logos .lg { position: relative; }
+.lg .me { position: absolute; right: 2px; top: 2px; width: 8px; height: 8px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 0 2px #04070d; }
+.fr-head { display: flex; align-items: center; gap: 18px; padding: 8px 0 14px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.fr-head .flogo { width: 88px; height: 88px; flex: none; }
+.fr-head h1 { margin: 0; font-size: 46px; line-height: 1; }
+.fr-head .sub { color: var(--muted); letter-spacing: 2px; font-family: var(--cond); text-transform: uppercase; font-size: 13px; }
+.youbadge { background: var(--blue); color: #fff; font-family: "Segoe UI", system-ui, sans-serif; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 10px; letter-spacing: 1px; vertical-align: middle; margin-left: 10px; font-style: normal; }
+.coaches { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 18px 0 6px; }
+.coach { position: relative; border-radius: 12px; padding: 16px 18px; background: linear-gradient(160deg, #1d2a48, #111827 70%); border: 1px solid #ffffff1a; overflow: hidden; transition: border-color .2s, transform .2s; }
+.coach:hover { transform: translateY(-3px); }
+.coach.edited { border-color: var(--superstar); }
+.coach.vacant { background: repeating-linear-gradient(135deg, #111827 0 12px, #141c2e 12px 24px); border-style: dashed; }
+.coach .role { color: var(--muted); font-family: var(--cond); letter-spacing: 2px; text-transform: uppercase; font-size: 12px; }
+.coach .cname { font-family: var(--cond); font-size: 28px; line-height: 1.05; margin: 3px 0 1px; }
+.coach .arch { color: #b9c8e6; font-size: 12px; }
+.coach .lvl { display: flex; align-items: center; gap: 14px; margin: 14px 0 10px; }
+.coach .ring { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--blue); display: grid; place-items: center; font-family: var(--cond); font-size: 26px; flex: none; transition: border-color .2s, box-shadow .2s; }
+.coach .ring.max { border-color: var(--superstar); box-shadow: 0 0 18px #d9a62e88; animation: pop .4s both; }
+.coach input[type=range] { width: 100%; accent-color: var(--blue); }
+.coach small { color: var(--muted); font-size: 11px; }
+.tbar { height: 8px; border-radius: 4px; background: #222b40; overflow: hidden; margin: 6px 0 2px; }
+.tbar i { display: block; height: 100%; background: linear-gradient(90deg, var(--blue), #7cc0ff); transition: width .6s cubic-bezier(.2, .8, .2, 1); }
+.coach .cbtns { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
+.coach .cbtns .btn { padding: 5px 11px; font-size: 12px; }
+.btn:disabled { opacity: .45; cursor: default; transform: none; }
+.frtools { display: flex; gap: 10px; align-items: center; margin: 20px 0 10px; flex-wrap: wrap; }
+.frlist { display: grid; gap: 6px; }
+.frrow { position: relative; display: grid; grid-template-columns: 44px 44px minmax(0, 1.3fr) 210px minmax(0, 1.4fr); gap: 12px; align-items: center; padding: 7px 12px; border-radius: 10px; background: linear-gradient(90deg, color-mix(in srgb, var(--dev) 32%, #121a2c), #111827 45%); border: 1px solid #ffffff12; overflow: hidden; transition: border-color .2s, transform .15s; }
+.frrow:hover { transform: translateX(3px); }
+.frrow.edited { border-color: var(--superstar); }
+.frrow > * { position: relative; z-index: 2; }
+.frrow img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; background: #0006; }
+.frrow .o { font-family: var(--cond); font-size: 22px; color: #31d07a; text-align: center; }
+.frrow b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.frrow small { color: var(--muted); font-size: 11px; }
+.seg { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.seg button { border: 2px solid var(--line); background: var(--panel2); border-radius: 6px; padding: 4px 2px; font-size: 11px; font-weight: 800; transition: border-color .15s, background .15s, transform .15s; }
+.seg button:hover { transform: translateY(-1px); }
+.seg button.on { border-color: var(--c); background: color-mix(in srgb, var(--c) 40%, var(--panel2)); }
+.abil { display: flex; gap: 6px; flex-wrap: wrap; }
+.abil select { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 12px; border: 0; color: #111; background: var(--rk); cursor: pointer; }
+.abil .none { color: var(--muted); font-size: 11px; }
+@media (max-width: 900px) { .coaches { grid-template-columns: 1fr; } .frrow { grid-template-columns: 44px 44px minmax(0, 1fr); } .frrow .seg, .frrow .abil { grid-column: 1 / -1; } }
 .funbar { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; margin-top: 14px; }
 .funbar span { color: var(--muted); font-family: var(--cond); letter-spacing: 2px; font-size: 12px; margin-right: 4px; }
 .funbar .btn { padding: 5px 11px; font-size: 12px; border-radius: 16px; }
@@ -121,7 +216,6 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
 .star5 { text-align: center; }
 .star5 .face { width: 100%; aspect-ratio: 1.1; border-radius: 10px; background: linear-gradient(180deg, color-mix(in srgb, var(--dev) 55%, #1a2236), #121a2c); overflow: hidden; display: grid; place-items: end center; }
 .star5 .face img { width: 105%; }
-.star5 .face span { font-family: var(--cond); font-size: 36px; color: #ffffff30; align-self: center; }
 .star5 small { display: block; margin-top: 6px; color: var(--muted); font-size: 11px; }
 .star5 b { font-family: var(--cond); font-size: 16px; text-transform: uppercase; letter-spacing: .5px; }
 .info { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px; padding: 16px 24px 22px; }
@@ -177,7 +271,6 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
 .card.full { border: 2px solid var(--dev, var(--normal)); background: linear-gradient(160deg, var(--dev, var(--normal)) 0%, #1a1f2d 62%); box-shadow: 0 8px 22px #0008; }
 .card .ovr { position: absolute; top: 8px; right: 8px; background: #0c120e; border: 2px solid #31d07a; color: #fff; border-radius: 6px; padding: 1px 6px; font-family: var(--cond); font-size: 20px; text-align: center; line-height: 1.1; z-index: 2; }
 .card .ovr small { display: block; font-size: 8px; color: #31d07a; }
-.card .initials { font-family: var(--cond); font-size: 46px; color: #ffffff22; }
 .card .photo { position: absolute; left: 50%; bottom: 34px; transform: translateX(-50%); width: 112%; max-width: none; pointer-events: none; }
 .card .meta { position: absolute; left: 0; right: 0; bottom: 0; padding: 8px 10px; background: linear-gradient(transparent, #000d 40%); z-index: 2; }
 .card .meta b { display: block; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -243,6 +336,8 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
 </head>
 <body>
 
+<div id="intro"><div class="i-skip">Click or press Esc to skip</div></div>
+
 <div id="splash">
   <div class="splash-box">
     <div class="ball"></div>
@@ -261,6 +356,8 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
       <div class="spacer"></div>
       <label>Roster <select id="rosterSel"></select></label>
       <button class="btn" id="folderBtn" title="Change saves folder">Saves folder</button>
+      <button class="btn blue" id="openDrafts">🎓 Draft classes</button>
+      <button class="btn blue" id="openFranchise">🏈 Franchise</button>
       <button class="btn" id="creditsBtn">Credits</button>
       <button class="btn mute" data-mute title="Sound on/off">🔊</button>
     </div>
@@ -292,12 +389,123 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
     <button class="btn" id="resetBtn" title="Undo your changes to this team">Reset team</button>
     <button class="btn" id="resetAllBtn" title="Undo your changes to every team in this roster">Reset all teams</button>
     <button class="btn" id="leagueBtn" title="Shuffle the whole NFL">League chaos</button>
+    <button class="btn" id="openDrafts2" title="Edit draft classes">🎓 Draft classes</button>
+    <button class="btn" id="openFranchise2" title="Edit a franchise save">🏈 Franchise</button>
     <button class="btn green" id="exportBtn">Export to Madden</button>
     <button class="btn mute" data-mute title="Sound on/off">🔊</button>
   </div>
   <div class="logos" id="logoBar"></div>
   <div class="wrap" id="app"></div>
 </section>
+
+<!-- 4. draft classes -->
+<section class="screen" id="draftScreen">
+  <div class="top">
+    <div class="brand">ROSTER<span>BUILDER</span></div>
+    <button class="btn" id="draftBack">◀ Back</button>
+    <div class="crumbs" style="margin-left:6px"><span>Offline</span><i>›</i><b>Draft Classes</b></div>
+    <div class="spacer"></div>
+    <label>Draft class <select id="draftSel"></select></label>
+    <button class="btn" id="draftReset" title="Undo your changes to this class">Reset class</button>
+    <button class="btn green" id="draftExportBtn">Export draft class</button>
+    <button class="btn mute" data-mute title="Sound on/off">🔊</button>
+  </div>
+  <div class="wrap">
+    <div class="draft-head">
+      <div><h1 class="cond" style="margin:0;font-size:40px">DRAFT BOARD</h1><div id="draftSummary" style="color:var(--muted)"></div></div>
+      <div class="qol" style="max-width:520px">
+        <button class="btn" data-dq="max" title="Every prospect shown: all ratings 99">All 99</button>
+        <button class="btn" data-dq="boost" title="+10 to every rating of the prospects shown">Boost +10</button>
+        <button class="btn" data-dq="xf" title="Every prospect shown: X-Factor">All X-Factor</button>
+        <button class="btn" data-dq="giant" title="Every prospect shown: 10'0&quot;">Giant class</button>
+        <button class="btn" data-dq="bust" title="Every prospect shown: all ratings 40">Bust class</button>
+      </div>
+    </div>
+    <div class="draft-filters">
+      <button class="btn green" id="newProspectBtn" title="Add a real college player from ESPN, or make one up">+ New prospect</button>
+      <input class="input" id="draftSearch" placeholder="Search prospects" style="flex:1;min-width:200px">
+      <select id="draftPos"></select>
+      <select id="draftSort"><option value="pick">Projected pick</option><option value="ovr">Overall</option><option value="pos">Position</option><option value="name">Name</option></select>
+    </div>
+    <div class="board" id="draftBoard"></div>
+  </div>
+</section>
+
+<!-- 5. franchise saves (beta) -->
+<section class="screen" id="franchiseScreen">
+  <div class="top">
+    <div class="brand">ROSTER<span>BUILDER</span></div>
+    <button class="btn" id="frBack">◀ Back</button>
+    <div class="crumbs" style="margin-left:6px"><span>Offline</span><i>›</i><b>Franchise</b><span class="beta">BETA</span></div>
+    <div class="spacer"></div>
+    <label>Franchise save <select id="frSel"></select></label>
+    <button class="btn" id="frReset" title="Undo every change to this save">Reset edits</button>
+    <button class="btn green" id="frExportBtn">Save as new franchise</button>
+    <button class="btn mute" data-mute title="Sound on/off">🔊</button>
+  </div>
+  <div class="logos" id="frLogos"></div>
+  <div class="wrap">
+    <div id="frHead"></div>
+    <div class="coaches" id="frCoaches"></div>
+    <div class="frtools">
+      <h2 class="cond" style="margin:0;font-size:26px">PLAYERS</h2>
+      <input class="input" id="frSearch" placeholder="Search every team" style="flex:1;min-width:200px">
+      <select id="frPos"></select>
+    </div>
+    <div class="frlist" id="frList"></div>
+    <p style="color:var(--muted);font-size:12px;margin-top:18px">Abilities show by slot: Madden keeps ability and talent names in the game files, not in your save. Changes go into a new save; your original is never touched.</p>
+  </div>
+</section>
+
+<aside class="drawer" id="pdrawer">
+  <div class="head" id="pHead"></div>
+  <div class="body" id="pBody"></div>
+  <div class="actions" id="pActions"></div>
+</aside>
+
+<div class="modal" id="newProspect" style="width:min(640px,94vw)">
+  <header><h2>New prospect</h2><div class="spacer"></div><button class="btn" data-close>Close</button></header>
+  <div class="list" style="padding:16px">
+    <label class="field">Starting ratings (change any of them next)<select class="input" id="npStart">
+      <option value="mid">Like an average prospect at his position</option>
+      <option value="top">Like the best prospect at his position</option>
+      <option value="max">All 99, X-Factor</option>
+    </select></label>
+    <h4 class="np-h">Add a real college player</h4>
+    <div style="display:flex;gap:8px"><input class="input" id="npSearch" placeholder="Search ESPN, for example Micah Ford" style="flex:1"><button class="btn blue" id="npSearchBtn">Search</button></div>
+    <div class="npresults" id="npResults"></div>
+    <h4 class="np-h">Or make up your own</h4>
+    <div class="grid2">
+      <label class="field">First name<input class="input" id="npFirst" maxlength="20"></label>
+      <label class="field">Last name<input class="input" id="npLast" maxlength="20"></label>
+      <label class="field">Position<select class="input" id="npPos"></select></label>
+      <div style="display:flex;align-items:flex-end"><button class="btn green" id="npCreate" style="width:100%">Create</button></div>
+    </div>
+    <p id="npRoom" style="color:var(--muted);font-size:12px;margin-bottom:0"></p>
+  </div>
+</div>
+
+<div class="modal" id="draftExporter" style="width:min(560px,94vw)">
+  <header><h2>Export draft class</h2><div class="spacer"></div><button class="btn" data-close>Close</button></header>
+  <div class="list" style="padding:16px">
+    <div class="field">New draft class name<input class="input" id="draftOutName" placeholder="MyDraftClass"></div>
+    <p style="color:var(--muted);font-size:12px">Writes a new <b>CAREERDRAFT-</b> file next to your others. In Madden Franchise, import it from the draft class list. Your original file is never changed.</p>
+    <div id="draftExportSummary" class="notes"></div>
+    <div style="margin-top:14px"><button class="btn green" id="doDraftExport">Export</button></div>
+    <div id="draftExportResult" style="margin-top:12px"></div>
+  </div>
+</div>
+
+<div class="modal" id="frExporter" style="width:min(560px,94vw)">
+  <header><h2>Save as a new franchise</h2><div class="spacer"></div><button class="btn" data-close>Close</button></header>
+  <div class="list" style="padding:16px">
+    <div class="field">New franchise save name<input class="input" id="frOutName" placeholder="GIANTSEDITED"></div>
+    <p style="color:var(--muted);font-size:12px">Writes a new <b>CAREER-</b> save next to your others, then reads it back to check every edit. Your original save is never changed. In Madden, open it from Franchise → Load.</p>
+    <div id="frExportSummary" class="notes"></div>
+    <div style="margin-top:14px"><button class="btn green" id="doFrExport">Save</button></div>
+    <div id="frExportResult" style="margin-top:12px"></div>
+  </div>
+</div>
 
 <div class="credit">MADE BY <b>YWKRLERCHE</b></div>
 
@@ -364,7 +572,10 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
   <div class="list credits-list" style="padding:18px 22px">
     <div class="splash-title" style="font-size:34px">ROSTER <span>BUILDER</span></div>
     <p>Made by <b style="color:var(--blue)">ywkrlerche</b></p>
-    <div style="color:var(--muted);font-size:12px">Player photos and team logos: ESPN · Live rosters and injuries: ESPN<br>Madden NFL 27 is a trademark of Electronic Arts. This is an unofficial fan tool.</div>
+    <div style="color:var(--muted);font-size:12px">Player photos and team logos: ESPN · Live rosters and injuries: ESPN<br>Franchise saves: the madden-franchise library by bep713 (MIT) · Draft class layout: Madden modding community research · <a href="/licenses" target="_blank" style="color:#9fb4da">Open-source licenses</a><br>Madden NFL 27 is a trademark of Electronic Arts. This is an unofficial fan tool.</div>
+    <h4 style="margin:18px 0 6px;color:var(--muted);font-size:11px;letter-spacing:1px">YOUR OWN INTROS</h4>
+    <div style="font-size:12px;color:var(--muted)">Drop .mp4 or .webm clips in your intros folder and they join the random intro rotation (on this PC only).</div>
+    <div style="margin-top:8px"><button class="btn" id="openIntros">Open intros folder</button></div>
   </div>
 </div>
 
@@ -398,23 +609,23 @@ const LAYOUT = {
   ],
 };
 const LABELS = {
-  POVR:'Overall', PSPD:'Speed', PACC:'Acceleration', PAGI:'Agility', PSTR:'Strength', PJMP:'Jumping', PSTA:'Stamina', PINJ:'Injury', PTGH:'Toughness', PAWR:'Awareness', PLCE:'Change of Direction',
-  PCAR:'Carrying', PBCV:'Ball Carrier Vision', PBKT:'Break Tackle', PELU:'Elusiveness', PLJM:'Juke Move', PLSM:'Spin Move', PLSA:'Stiff Arm', PLTR:'Trucking',
+  POVR:'Overall', PSPD:'Speed', PACC:'Acceleration', PAGI:'Agility', PSTR:'Strength', PJMP:'Jumping', PSTA:'Stamina', PINJ:'Injury', PTGH:'Toughness', PAWR:'Awareness', PLCE:'Personality',
+  PCAR:'Carrying', PBCV:'Ball Carrier Vision', PBKT:'Break Tackle', PELU:'Change of Direction', PLJM:'Juke Move', PLSM:'Spin Move', PLSA:'Stiff Arm', PLTR:'Trucking',
   PCTH:'Catching', PLCI:'Catch in Traffic', PLSC:'Spectacular Catch', SRRN:'Short Route Running', PMRR:'Medium Route Running', PDRR:'Deep Route Running', PLRL:'Release', PKRT:'Kick Return',
-  PTHP:'Throw Power', PTAS:'Short Accuracy', PTAM:'Medium Accuracy', PTAD:'Deep Accuracy', PTOR:'Throw on the Run', PTUP:'Throw Under Pressure', PPLA:'Play Action', PBSK:'Break Sack', PTHA:'Throw rating (PTHA)',
-  PRBK:'Run Block', PRBS:'Run Block Power', PRBF:'Run Block Finesse', PPBK:'Pass Block', PPBS:'Pass Block Power', PPBF:'Pass Block Finesse', PIMP:'Impact Blocking', PLBK:'Lead Block',
+  PTHP:'Throw Power', PTAS:'Short Accuracy', PTAM:'Medium Accuracy', PTAD:'Deep Accuracy', PTOR:'Throw on the Run', PTUP:'Throw Under Pressure', PPLA:'Play Action', PBSK:'Break Sack', PTHA:'Throw Accuracy',
+  PRBK:'Run Block', PRBS:'Run Block Power', PRBF:'Run Block Finesse', PPBK:'Pass Block', PPBS:'Pass Block Power', PPBF:'Pass Block Finesse', PLIB:'Impact Blocking', PLBK:'Lead Block',
   PTAK:'Tackle', PLHT:'Hit Power', PLPU:'Pursuit', PLPR:'Play Recognition', PBSG:'Block Shedding', PFMS:'Finesse Moves', PLPM:'Power Moves', PLMC:'Man Coverage', PLZC:'Zone Coverage', PLPE:'Press',
-  PKPR:'Kick Power', PKAC:'Kick Accuracy', PLIB:'Unlabeled (PLIB)', PSTM:'Unlabeled (PSTM)',
+  PKPR:'Kick Power', PKAC:'Kick Accuracy', PIMP:'Unlabeled (PIMP)', PSTM:'Unlabeled (PSTM)',
 };
 const GROUPS = {
-  Physical: ['PSPD','PACC','PAGI','PSTR','PJMP','PSTA','PINJ','PTGH','PAWR','PLCE'],
-  'Ball Carrier': ['PCAR','PBCV','PBKT','PELU','PLJM','PLSM','PLSA','PLTR'],
+  Physical: ['PSPD','PACC','PAGI','PELU','PSTR','PJMP','PSTA','PINJ','PTGH','PAWR'],
+  'Ball Carrier': ['PCAR','PBCV','PBKT','PLJM','PLSM','PLSA','PLTR'],
   Receiving: ['PCTH','PLCI','PLSC','SRRN','PMRR','PDRR','PLRL','PKRT'],
   Passing: ['PTHP','PTAS','PTAM','PTAD','PTOR','PTUP','PPLA','PBSK','PTHA'],
-  Blocking: ['PRBK','PRBS','PRBF','PPBK','PPBS','PPBF','PIMP','PLBK'],
+  Blocking: ['PRBK','PRBS','PRBF','PPBK','PPBS','PPBF','PLIB','PLBK'],
   Defense: ['PTAK','PLHT','PLPU','PLPR','PBSG','PFMS','PLPM','PLMC','PLZC','PLPE'],
   Kicking: ['PKPR','PKAC'],
-  Other: ['PLIB','PSTM'],
+  Other: ['PLCE','PIMP','PSTM'],
 };
 const ALL_RATINGS = ['POVR', ...Object.values(GROUPS).flat()];
 // roster team id -> ESPN abbreviation (logos), conference and division; ids stay fixed even if a team is renamed
@@ -469,11 +680,75 @@ function logoFailed(img) {
   d.className = 'logo-txt'; d.style.background = img.dataset.bg; d.textContent = img.alt;
   img.replaceWith(d);
 }
-function showScreen(id) { for (const s of ['#confScreen', '#teamScreen', '#builder']) $(s).classList.toggle('on', s === id); window.scrollTo({ top: 0 }); }
+function showScreen(id) { for (const s of ['#confScreen', '#teamScreen', '#builder', '#draftScreen', '#franchiseScreen']) $(s).classList.toggle('on', s === id); window.scrollTo({ top: 0 }); }
+
+// ---- intro: one of several original openings (plus your own clips), picked at random every launch ----
+const TAGLINES = ['Your roster. Your rules.', 'Every player. Every team.', 'Build the dynasty.', 'Draft it. Build it. Play it.', 'Legends never retire.', 'Your league now.'];
+const INTROS = {
+  kickoff(stage, title) {
+    stage.innerHTML = '<div class="ball3"></div>';
+    Sound.whoosh();
+    return [[900, () => { stage.innerHTML = title('slam .7s cubic-bezier(.2,.9,.3,1) both'); $('#intro').style.animation = 'shake .45s'; Sound.boom(); Sound.crowd(2.6); }]];
+  },
+  lights(stage, title) {
+    stage.innerHTML = [8, 30, 52, 74].map((x, i) => `<div class="light" style="left:${x}vw"></div>`).join('');
+    const steps = [0, 1, 2, 3].map(i => [i * 320, () => { stage.children[i].style.animation = 'flash 1.6s forwards'; Sound.clunk(); }]);
+    return [...steps, [1350, () => { $('#intro').style.background = 'radial-gradient(900px 500px at 50% 35%, #1d3566, #000 75%)'; stage.insertAdjacentHTML('beforeend', title('rise .8s both')); Sound.hum(); Sound.crowd(2); }]];
+  },
+  broadcast(stage, title) {
+    stage.innerHTML = ['#2f8bff', '#d8343f', '#ffffff'].map((c, i) => `<div class="bar" style="background:${c};animation-delay:${i * .12}s;opacity:${i === 2 ? .85 : 1}"></div>`).join('');
+    Sound.whoosh();
+    return [[700, () => { stage.innerHTML = title('wipe .6s ease-out both'); Sound.stinger(); }]];
+  },
+  scoreboard(stage, title, intervals) {
+    stage.innerHTML = '<div class="digits">00</div>';
+    Sound.whistle();
+    const d = stage.firstChild; let n = 0;
+    const spin = setInterval(() => { d.textContent = String(Math.floor(Math.random() * 100)).padStart(2, '0'); if (++n % 3 === 0) Sound.tick(); }, 60);
+    intervals.push(spin);
+    return [[1100, () => { clearInterval(spin); d.textContent = '27'; Sound.boom(); }], [1700, () => { stage.innerHTML = title('slam .6s both'); Sound.crowd(2); }]];
+  },
+  coin(stage, title) {
+    stage.innerHTML = '<div class="coin3">RB</div>';
+    Sound.whoosh();
+    return [[1500, () => Sound.ting()], [1900, () => { stage.innerHTML = title('rise .7s both'); Sound.stinger(); }]];
+  },
+};
+async function playIntro() {
+  const el = $('#intro');
+  let custom = [];
+  try { custom = (await api('/api/intros')).videos || []; } catch {}
+  const options = [...Object.keys(INTROS), ...custom.map(v => 'video:' + v)];
+  const last = store.get('rb:lastIntro');
+  const pool = options.length > 1 ? options.filter(o => o !== last) : options; // never the same intro twice in a row
+  const forced = new URLSearchParams(location.search).get('intro'); // e.g. ?intro=coin to preview one
+  const pick = INTROS[forced] ? forced : pool[Math.floor(Math.random() * pool.length)];
+  store.set('rb:lastIntro', pick);
+  const tag = TAGLINES[Math.floor(Math.random() * TAGLINES.length)];
+  const stage = document.createElement('div'); stage.className = 'stage'; el.appendChild(stage);
+  el.insertAdjacentHTML('beforeend', '<div class="i-by">MADE BY YWKRLERCHE</div>');
+  return new Promise(resolve => {
+    const timers = [], intervals = [];
+    const finish = () => { timers.forEach(clearTimeout); intervals.forEach(clearInterval); el.classList.add('done'); el.querySelector('video')?.pause(); setTimeout(() => el.remove(), 700); resolve(); };
+    el.addEventListener('click', finish, { once: true });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' || e.key === ' ' || e.key === 'Enter') finish(); }, { once: true });
+    if (pick.startsWith('video:')) {
+      stage.innerHTML = `<video src="/intros/${encodeURIComponent(pick.slice(6))}" autoplay playsinline></video>`;
+      const v = stage.firstChild; v.muted = Sound.muted;
+      v.onended = finish; v.onerror = finish; timers.push(setTimeout(finish, 15000));
+      v.play().catch(() => { v.muted = true; v.play().catch(finish); });
+      return;
+    }
+    const title = anim => `<div><div class="i-title" style="animation:${anim}${pick === 'lights' ? ', glowpulse 2s 1s infinite' : ''}">ROSTER<span>BUILDER</span></div><div class="i-tag" style="animation-delay:.5s">${esc(tag)}</div></div>`;
+    for (const [at, fn] of INTROS[pick](stage, title, intervals)) timers.push(setTimeout(fn, at));
+    timers.push(setTimeout(finish, 3700));
+  });
+}
 
 // ---- loading ----
 const splash = (pct, msg) => { $('#splashBar').style.width = pct + '%'; if (msg) $('#splashMsg').textContent = msg; };
 async function boot() {
+  const intro = playIntro();
   const started = Date.now();
   try {
     splash(15, 'Finding your Madden rosters…');
@@ -493,6 +768,7 @@ async function boot() {
     }
   } catch (e) { toast(e.message, true); }
   splash(100, 'Ready');
+  await intro;
   await new Promise(r => setTimeout(r, Math.max(0, 1300 - (Date.now() - started))));
   $('#splash').classList.add('done');
   renderConferences(); showScreen('#confScreen');
@@ -588,7 +864,7 @@ function previewTeam(id) {
       </div>
       <div class="stars">${pr.top5.map((p, i) => `
         <div class="star5 anim" style="--i:${i + 2};--dev:${devOf(p).color}">
-          <div class="face">${photo(p) || `<span>${esc(p.PFNA[0] + p.PLNA[0])}</span>`}</div>
+          <div class="face">${photo(p, '', idn)}</div>
           <small>${posName(p.PPOS)} | ${p.POVR} OVR</small><b>${esc(p.PFNA[0])}. ${esc(p.PLNA)}</b>
         </div>`).join('')}</div>
       <div class="info">
@@ -672,11 +948,10 @@ function groupHtml([title, short, s, depths], i) {
   const ids = st.slots[s] || [];
   const top = ids[depths[0]] ? P(ids[depths[0]]) : null;
   const card = top
-    ? `<div class="card full" style="--dev:${devOf(top).color}" data-s="${s}" data-d="${depths[0]}">
+    ? `<div class="card full ${top.PROL === 3 ? 'xf' : ''}" style="--dev:${devOf(top).color}" data-s="${s}" data-d="${depths[0]}">
          <div class="devtag">${devOf(top).name}</div>
          <div class="ovr">${top.POVR}<small>OVR</small></div>
-         <div class="initials">${esc((top.PFNA[0] || '') + (top.PLNA[0] || ''))}</div>
-         ${photo(top, 'photo')}
+         ${photo(top, 'photo', st.identity)}
          <div class="meta"><b>${esc(top.PFNA)} ${esc(top.PLNA)}</b><span>#${top.PJEN} · ${posName(top.PPOS)} · ${ht(top.PHGT)} ${top.PWGT} lb${top.injured ? ' · <span class="inj">INJ</span>' : ''}</span></div>
        </div>`
     : `<div class="card empty" data-s="${s}" data-d="${depths[0]}"><div class="plus">+</div></div>`;
@@ -709,7 +984,7 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('dblclick', e => { const tl = e.target.closest('[data-tile]'); if (tl) openBuilder(Number(tl.dataset.tile)); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
-function closeAll() { for (const s of ['#shade', '#picker', '#exporter', '#syncer', '#credits', '#league', '#drawer']) $(s).classList.remove('on'); picking = editing = null; }
+function closeAll() { for (const s of ['#shade', '#picker', '#exporter', '#syncer', '#credits', '#league', '#drawer', '#pdrawer', '#draftExporter', '#newProspect', '#frExporter']) $(s).classList.remove('on'); picking = editing = null; }
 const openModal = id => { $('#shade').classList.add('on'); $(id).classList.add('on'); };
 
 // ---- player picker ----
@@ -729,7 +1004,7 @@ function renderPicks() {
     .sort((a, b) => b.POVR - a.POVR).slice(0, 250);
   $('#pickList').innerHTML = list.map(p => `
     <div class="pick" data-pick="${p.PGID}" style="--dev:${devOf(p).color}">
-      ${photo(p) || '<span></span>'}
+      ${photo(p)}
       <div class="o">${p.POVR}</div>
       <div><b>${esc(p.PFNA)} ${esc(p.PLNA)}</b> ${p.injured ? '<span class="inj">INJ</span>' : ''}${inLineup.has(p.PGID) ? ' <small>(in lineup)</small>' : ''}<br><small>#${p.PJEN} · age ${p.PAGE}</small></div>
       <div>${posName(p.PPOS)}</div><div><small>${p.legend ? '🏆 LEGEND' : esc(team(p.TGID)?.abbr || '')}</small></div>
@@ -750,7 +1025,7 @@ function edit(f, v) { (st.edits[editing.id] ??= {})[f] = v; save(); }
 function renderEditor() {
   const p = P(editing.id), dev = devOf(p);
   $('#drawer').style.setProperty('--dev', dev.color);
-  $('#dHead').innerHTML = `${photo(p)}<div class="bigovr">${p.POVR}</div><div><b style="font-size:18px">${esc(p.PFNA)} ${esc(p.PLNA)}</b><br><span style="color:#d6dbe6">${posName(p.PPOS)} · ${p.legend ? '🏆 Legend' : esc(team(players.get(p.PGID).TGID)?.abbr || '')} · ${dev.name}</span></div>`;
+  $('#dHead').innerHTML = `${photo(p, '', st.identity)}<div class="bigovr">${p.POVR}</div><div><b style="font-size:18px">${esc(p.PFNA)} ${esc(p.PLNA)}</b><br><span style="color:#d6dbe6">${posName(p.PPOS)} · ${p.legend ? '🏆 Legend' : esc(team(players.get(p.PGID).TGID)?.abbr || '')} · ${dev.name}</span></div>`;
   const ft = Math.floor(p.PHGT / 12), inch = p.PHGT % 12;
   $('#dBody').innerHTML = `
     <div class="grid2">
@@ -817,7 +1092,9 @@ async function savePhoto(name, dataUrl) {
     customShots = await api('/api/custom-photo', { name, dataUrl });
     toast(dataUrl ? `Photo saved for ${name}` : `Photo removed for ${name}`);
     if (editing) renderEditor();
-    render();
+    if (st) render();
+    // the draft screen has its own editor (photos can be uploaded there before any team is opened)
+    if ($('#draftScreen').classList.contains('on')) { renderDraft(true); if ($('#pdrawer').classList.contains('on')) renderProspect(); }
   } catch (e) { toast(e.message, true); }
 }
 function rateHtml(p, f) {
@@ -841,36 +1118,71 @@ const normName = s => String(s).toLowerCase().replace(/\b(jr|sr|ii|iii|iv|v)\b\.
 // photos you uploaded yourself win over ESPN/Wikipedia ones
 let customShots = {};
 async function loadCustomPhotos() { try { customShots = await api('/api/custom-photos'); } catch {} }
-function photo(p, cls = '') {
+// every player gets a headshot: your upload, else ESPN or Wikipedia, else a silhouette in his team's colors with his number
+function photo(p, cls = '', colors) {
   const k = normName(`${p.PFNA} ${p.PLNA}`), url = customShots[k] || shots[k];
-  if (!url && p.legend) queueLegendPhoto(`${p.PFNA} ${p.PLNA}`, k);
-  return url ? `<img class="${cls}" src="${esc(url)}" alt="" loading="lazy" onerror="this.remove()">` : '';
+  if (!url && (p.legend || shotsReady)) queuePlayerPhoto(`${p.PFNA} ${p.PLNA}`, k);
+  const t = colors || team(p.TGID);
+  return headshot(url, silhouette(p.PJEN, t?.primary, t?.secondary), cls, k);
 }
-// legends: looked up on demand (ESPN search, then Wikipedia) in small batches, then the visible view redraws
-const askedLegends = new Set(), legendQueue = new Map();
-let legendTimer = null;
-function queueLegendPhoto(name, k) {
-  if (askedLegends.has(k)) return;
-  askedLegends.add(k); legendQueue.set(name, k);
-  clearTimeout(legendTimer); legendTimer = setTimeout(fetchLegendPhotos, 120);
+// k ties the image to a player so a photo found later can swap in place, without redrawing the screen
+const headshot = (url, sil, cls = '', k = '') =>
+  `<img class="${cls}" src="${esc(url && !badPhotos.has(url) ? url : sil)}" data-fallback="${esc(sil)}"${k ? ` data-k="${k}"` : ''} alt="" loading="lazy" onerror="photoFailed(this)">`;
+// a photo that won't load (offline, removed) falls back to the silhouette and isn't tried again
+const badPhotos = new Set();
+function photoFailed(img) { badPhotos.add(img.getAttribute('src')); img.onerror = null; img.src = img.dataset.fallback; }
+const silCache = new Map();
+function silhouette(number, primary = [58, 69, 98], secondary = [255, 255, 255]) {
+  const lum = c => (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255;
+  // the number needs contrast with the jersey
+  const trim = Math.abs(lum(primary) - lum(secondary)) < 0.25 ? (lum(primary) > 0.55 ? [17, 17, 17] : [255, 255, 255]) : secondary;
+  const num = Number.isFinite(number) ? String(number) : '';
+  const key = `${num}|${primary}|${trim}`;
+  if (silCache.has(key)) return silCache.get(key);
+  const light = hex(primary.map(v => Math.round(v + (255 - v) * 0.22)));
+  // same 350x254 frame as ESPN headshots, so it sits on cards exactly like a real photo
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 350 254"><defs>
+    <linearGradient id="h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3e8f1"/><stop offset="1" stop-color="#9aa5b9"/></linearGradient>
+    <linearGradient id="j" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${light}"/><stop offset="1" stop-color="${hex(primary)}"/></linearGradient>
+    <filter id="d" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000" flood-opacity=".35"/></filter></defs>
+    <g filter="url(#d)"><path d="M38 254C40 212 72 190 120 183L150 176H200L230 183C278 190 310 212 312 254Z" fill="url(#j)"/>
+    <path d="M150 138V178Q175 198 200 178V138Z" fill="url(#h)"/>
+    <ellipse cx="126" cy="100" rx="9" ry="16" fill="#aeb8c9"/><ellipse cx="224" cy="100" rx="9" ry="16" fill="#aeb8c9"/>
+    <ellipse cx="175" cy="94" rx="50" ry="60" fill="url(#h)"/></g>
+    <path d="M150 177L175 199L200 177" fill="none" stroke="${hex(trim)}" stroke-width="8" stroke-linejoin="round"/>
+    ${num ? `<text x="175" y="231" text-anchor="middle" font-family="Bahnschrift,Arial Narrow,Arial,sans-serif" font-weight="700" font-size="29" fill="${hex(trim)}">${num}</text>` : ''}</svg>`;
+  const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  silCache.set(key, url);
+  return url;
 }
-async function fetchLegendPhotos() {
-  const batch = [...legendQueue].slice(0, 40); batch.forEach(([n]) => legendQueue.delete(n));
+// players ESPN's current rosters don't cover (legends, free agents, created players): looked up once by name in small batches
+const askedPhotos = new Set(), photoQueue = new Map();
+let photoTimer = null, shotsReady = false;
+function queuePlayerPhoto(name, k) {
+  if (askedPhotos.has(k)) return;
+  askedPhotos.add(k); photoQueue.set(name, k);
+  clearTimeout(photoTimer); photoTimer = setTimeout(fetchPlayerPhotos, 120);
+}
+async function fetchPlayerPhotos() {
+  const batch = [...photoQueue].slice(0, 40); batch.forEach(([n]) => photoQueue.delete(n));
   if (!batch.length) return;
   try {
-    const found = await api('/api/legend-photos', { names: batch.map(([n]) => n) });
-    let any = false;
-    for (const [n, k] of batch) if (found[n]) { shots[k] = found[n]; any = true; }
-    if (any) {
-      if ($('#builder').classList.contains('on') && st) render();
-      if ($('#picker').classList.contains('on')) renderPicks();
-      if ($('#drawer').classList.contains('on') && editing) renderEditor();
-    }
+    const found = await api('/api/player-photos', { names: batch.map(([n]) => n) });
+    for (const [n, k] of batch) if (found[n]) { shots[k] = found[n]; swapPhotos(); }
   } catch {}
-  if (legendQueue.size) fetchLegendPhotos();
+  if (photoQueue.size) fetchPlayerPhotos();
+}
+// put newly found photos into images already on screen
+function swapPhotos() {
+  for (const img of document.querySelectorAll('img[data-k]')) {
+    const url = customShots[img.dataset.k] || shots[img.dataset.k];
+    if (url && !badPhotos.has(url) && img.getAttribute('src') !== url) { img.onerror = () => photoFailed(img); img.src = url; }
+  }
 }
 async function loadPhotos() {
   try { const r = await api('/api/headshots'); if (!r.offline) shots = r; } catch {}
+  shotsReady = true;
+  swapPhotos();
 }
 
 // ---- quality-of-life ----
@@ -894,7 +1206,7 @@ async function loadLegends() {
     const r = await api('/api/legends?base=' + encodeURIComponent(st.base));
     for (const p of r.players) players.set(p.PGID, p);
     // photos already found for legends (the server keeps fetching the rest in the background)
-    for (const [name, url] of Object.entries(r.photos || {})) { const k = normName(name); askedLegends.add(k); if (url) shots[k] = url; }
+    for (const [name, url] of Object.entries(r.photos || {})) { const k = normName(name); askedPhotos.add(k); if (url) shots[k] = url; }
     legendsFor = st.base;
     if (!$('#pickTeam option[value="legends"]')) $('#pickTeam').insertAdjacentHTML('beforeend', '<option value="legends">LEGENDS</option>');
     return true;
@@ -965,6 +1277,7 @@ $('#rosterSel').onchange = async e => {
 $('#backConf').onclick = () => { renderConferences(); showScreen('#confScreen'); };
 $('#toTeams').onclick = () => openConference(NFL[st.teamId]?.[1] || conf, st.teamId);
 $('#creditsBtn').onclick = () => openModal('#credits');
+$('#openIntros').onclick = () => api('/api/open-intros', {}).then(r => toast('Intros folder: ' + r.dir)).catch(e => toast(e.message, true));
 $('#resetBtn').onclick = () => { if (!st) return; st = freshState(st.base, st.teamId); save(); render(); toast('Team reset to the roster file'); };
 let resetArm = 0;
 $('#resetAllBtn').onclick = () => {
@@ -1065,12 +1378,465 @@ $('#doSync').onclick = async () => {
   btn.disabled = false; btn.textContent = 'Sync selected rosters';
 };
 
+// ---- draft classes ----
+const DRAFT_GROUPS = {
+  Physical: ['speed', 'acceleration', 'agility', 'changeOfDirection', 'strength', 'jumping', 'stamina', 'injury', 'toughness', 'awareness'],
+  'Ball Carrier': ['carrying', 'ballCarrierVision', 'breakTackle', 'jukeMove', 'spinMove', 'stiffArm', 'trucking'],
+  Receiving: ['catching', 'catchInTraffic', 'spectacularCatch', 'shortRouteRunning', 'mediumRouteRunning', 'deepRouteRunning', 'release', 'kickReturn'],
+  Passing: ['throwPower', 'throwAccuracy', 'throwAccuracyShort', 'throwAccuracyMid', 'throwAccuracyDeep', 'throwOnTheRun', 'throwUnderPressure', 'playAction', 'breakSack'],
+  Blocking: ['runBlock', 'runBlockPower', 'runBlockFinesse', 'passBlock', 'passBlockPower', 'passBlockFinesse', 'impactBlocking', 'leadBlock'],
+  Defense: ['tackle', 'hitPower', 'pursuit', 'playRecognition', 'blockShedding', 'finesseMoves', 'powerMoves', 'manCoverage', 'zoneCoverage', 'pressCoverage'],
+  Kicking: ['kickPower', 'kickAccuracy'],
+  Other: ['personality'],
+};
+const DRAFT_RATINGS = Object.values(DRAFT_GROUPS).flat();
+const ratingLabel = n => n.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase());
+// capacity: how many prospects the file has room for; added: prospects you created (index = file count + n)
+let draft = { file: null, prospects: [], edits: {}, added: [], capacity: 0 }, draftShots = {}, editingProspect = null, COLLEGES = {};
+const draftKey = () => `rbd:${draft.file}`;
+const saveDraft = () => store.set(draftKey(), { edits: draft.edits, added: draft.added });
+const isCreated = i => i >= draft.prospects.length;
+const room = () => draft.capacity - draft.prospects.length - draft.added.length;
+// prospect = file data + this session's edits; a created prospect is its own record
+const PP = i => {
+  if (isCreated(i)) return draft.added[i - draft.prospects.length];
+  const p = draft.prospects[i], e = draft.edits[i] || {};
+  return { ...p, ...e, ratings: { ...p.ratings, ...(e.ratings || {}) } };
+};
+// someone who plays a position, preferring a generic face (no scanned head): created prospects copy their look from one
+function positionDonor(pos) {
+  const at = draft.prospects.filter(p => p.position === pos);
+  return at.find(p => !p.assetName) ?? at[0] ?? draft.prospects.find(p => !p.assetName) ?? draft.prospects[0];
+}
+function editProspect(i, f, v) {
+  const e = isCreated(i) ? draft.added[i - draft.prospects.length] : (draft.edits[i] ??= {});
+  if (DRAFT_RATINGS.includes(f)) (e.ratings ??= {})[f] = v; else e[f] = v;
+  // a new position brings that position's archetype and QB animations (and for created players, its gear)
+  if (f === 'position') {
+    const d = positionDonor(v);
+    if (isCreated(i)) e.template = d.index;
+    else if (v === draft.prospects[i].position) { delete e.archetype; delete e.qbStyle; delete e.qbStance; }
+    else Object.assign(e, { archetype: d.archetype, qbStyle: d.qbStyle, qbStance: d.qbStance });
+  }
+}
+const collegeName = id => COLLEGES[id]?.[0] ?? `College #${id}`;
+const collegeFor = espnId => { const hit = Object.entries(COLLEGES).find(([, c]) => c[1] === espnId); return hit ? Number(hit[0]) : null; };
+async function loadColleges() { if (!Object.keys(COLLEGES).length) try { COLLEGES = await api('/api/colleges'); } catch { /* names show as numbers */ } }
+
+async function openDrafts() {
+  await loadColleges();
+  const { drafts, savesDir } = await api('/api/drafts');
+  if (!drafts.length) return toast(`No CAREERDRAFT files in ${savesDir}`, true);
+  $('#draftSel').innerHTML = drafts.map(d => `<option>${esc(d.name)}</option>`).join('');
+  const last = store.get('rb:lastDraft'); if (last && drafts.some(d => d.name === last)) $('#draftSel').value = last;
+  $('#draftPos').innerHTML = '<option value="">All positions</option>' + POS.map((p, i) => `<option value="${i}">${p}</option>`).join('');
+  showScreen('#draftScreen');
+  await loadDraft($('#draftSel').value);
+}
+async function loadDraft(file) {
+  $('#draftBoard').innerHTML = '<div class="empty-state">Reading draft class…</div>';
+  let r;
+  try { r = await api('/api/draft?file=' + encodeURIComponent(file)); }
+  catch (e) { $('#draftBoard').innerHTML = `<div class="empty-state">${esc(e.message)}</div>`; return; }
+  const kept = store.get(`rbd:${file}`) || {};
+  const saved = 'edits' in kept || 'added' in kept ? kept : { edits: kept }; // older versions kept only the edits
+  const added = (saved.added || []).filter(a => a.template < r.prospects.length).map((a, n) => ({ ...a, index: r.prospects.length + n }));
+  draft = { file, prospects: r.prospects, capacity: r.capacity, edits: saved.edits || {}, added };
+  store.set('rb:lastDraft', file);
+  renderDraft();
+}
+function shownProspects() {
+  const q = $('#draftSearch').value.trim().toLowerCase(), pos = $('#draftPos').value, sort = $('#draftSort').value;
+  const list = [...draft.prospects.map((_, i) => PP(i)), ...draft.added].filter(p => (!q || `${p.firstName} ${p.lastName}`.toLowerCase().includes(q)) && (pos === '' || p.position === Number(pos)));
+  // the stored pick counts within its round, so sort by round then pick (63 = undrafted, last)
+  const by = { pick: (a, b) => a.draftRound - b.draftRound || a.draftPick - b.draftPick, ovr: (a, b) => b.overall - a.overall, pos: (a, b) => a.position - b.position || b.overall - a.overall, name: (a, b) => a.lastName.localeCompare(b.lastName) }[sort];
+  return list.sort(by);
+}
+// NFL-style projection: round.pick (1.01, 2.14), or UDFA
+const slotLabel = p => p.draftRound >= 1 && p.draftRound <= 7 ? `${p.draftRound}.${String(p.draftPick).padStart(2, '0')}` : 'UDFA';
+function prospectPhoto(p) {
+  const n = `${p.firstName} ${p.lastName}`;
+  // a real player added from ESPN brings his own headshot; made-up players aren't looked up
+  const url = customShots[normName(n)] || p.headshot || (p.added ? null : draftShots[n]);
+  if (url === undefined && !draftAsked.has(n)) queueProspectPhoto(n);
+  return headshot(url, silhouette(p.jersey)); // prospects have no team yet: neutral jersey
+}
+const draftAsked = new Set(), draftQueue = new Set();
+let draftTimer = null;
+function queueProspectPhoto(n) { draftAsked.add(n); draftQueue.add(n); clearTimeout(draftTimer); draftTimer = setTimeout(fetchProspectPhotos, 150); }
+async function fetchProspectPhotos() {
+  const batch = [...draftQueue].slice(0, 60); batch.forEach(n => draftQueue.delete(n));
+  if (!batch.length) return;
+  try { Object.assign(draftShots, await api('/api/prospect-photos', { names: batch })); if ($('#draftScreen').classList.contains('on')) renderDraft(true); } catch {}
+  if (draftQueue.size) fetchProspectPhotos();
+}
+function renderDraft(quiet) {
+  const list = shownProspects();
+  const edited = Object.keys(draft.edits).length;
+  $('#draftSummary').textContent = `${draft.prospects.length + draft.added.length} prospects · ${draft.added.length} created · ${edited} edited · room for ${room()} more · showing ${list.length}`;
+  $('#draftBoard').innerHTML = list.slice(0, 160).map((p, n) => `
+    <div class="prospect ${quiet ? '' : 'anim'} ${p.added ? 'created' : draft.edits[p.index] ? 'edited' : ''}" style="--i:${Math.min(n, 30)};--dev:${(DEV[p.devTrait] || DEV[0]).color}" data-prospect="${p.index}">
+      <div class="pic">${prospectPhoto(p)}</div>
+      <div class="rank">${slotLabel(p)}</div><div class="ovr">${p.overall}</div>
+      <div class="pinfo"><b>${esc(p.firstName)} ${esc(p.lastName)}</b><small>${posName(p.position)} · ${esc(collegeName(p.college))} · ${ht(p.height)} ${p.weight}</small></div>
+    </div>`).join('') + (list.length > 160 ? `<div class="empty-state" style="grid-column:1/-1">Showing the first 160 of ${list.length}. Search or filter to find the rest.</div>` : '');
+}
+for (const id of ['#draftSearch', '#draftPos', '#draftSort']) $(id).addEventListener('input', () => renderDraft());
+$('#draftSel').onchange = e => loadDraft(e.target.value);
+$('#openDrafts').onclick = () => openDrafts().catch(e => toast(e.message, true));
+$('#openDrafts2').onclick = () => openDrafts().catch(e => toast(e.message, true));
+$('#draftBack').onclick = () => { if (st) showScreen('#builder'); else { renderConferences(); showScreen('#confScreen'); } };
+$('#draftReset').onclick = () => { draft.edits = {}; draft.added = []; saveDraft(); renderDraft(); toast('Draft class reset to the file'); };
+$('#draftBoard').addEventListener('click', e => { const c = e.target.closest('[data-prospect]'); if (c) openProspect(Number(c.dataset.prospect)); });
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-dq]'); if (!b) return;
+  const list = shownProspects();
+  for (const p of list) {
+    if (b.dataset.dq === 'xf') editProspect(p.index, 'devTrait', 3);
+    else if (b.dataset.dq === 'giant') editProspect(p.index, 'height', 120);
+    else {
+      const set = { max: () => 99, bust: () => 40, boost: r => Math.min(99, p.ratings[r] + 10) }[b.dataset.dq];
+      for (const r of DRAFT_RATINGS) editProspect(p.index, r, set(r));
+      editProspect(p.index, 'overall', set === undefined ? p.overall : b.dataset.dq === 'boost' ? Math.min(99, p.overall + 10) : set());
+    }
+  }
+  saveDraft(); renderDraft(true); toast(`${list.length} prospects updated`);
+});
+
+function openProspect(i) { editingProspect = i; openModal('#pdrawer'); renderProspect(); }
+function renderProspect() {
+  const i = editingProspect, p = PP(i), dev = DEV[p.devTrait] || DEV[0];
+  $('#pdrawer').style.setProperty('--dev', dev.color);
+  const img = prospectPhoto(p);
+  $('#pHead').innerHTML = `${img.replace('<img', '<img style="width:64px;height:64px;object-fit:cover;border-radius:50%"')}<div class="bigovr">${p.overall}</div><div><b style="font-size:18px">${esc(p.firstName)} ${esc(p.lastName)}</b><br><span style="color:#d6dbe6">${posName(p.position)} · ${esc(collegeName(p.college))} · age ${p.age} · projected ${slotLabel(p)} · ${dev.name}</span></div>`;
+  const num = (f, label, min, max) => `<label class="field">${label}<input class="input" type="number" min="${min}" max="${max}" data-pf="${f}" value="${p[f]}"></label>`;
+  // every named college, A to Z, plus this prospect's own if the list doesn't name it
+  const colleges = Object.entries(COLLEGES).map(([id, c]) => [Number(id), c[0], c[1]]).sort((a, b) => a[1].localeCompare(b[1]));
+  if (!COLLEGES[p.college]) colleges.unshift([p.college, collegeName(p.college)]);
+  const logo = COLLEGES[p.college]?.[1];
+  const custom = customShots[normName(`${p.firstName} ${p.lastName}`)];
+  $('#pBody').innerHTML = `
+    <div class="grid2">
+      <label class="field">First name<input class="input" data-pf="firstName" maxlength="20" value="${esc(p.firstName)}"></label>
+      <label class="field">Last name<input class="input" data-pf="lastName" maxlength="20" value="${esc(p.lastName)}"></label>
+      <label class="field">Position<select class="input" data-pf="position">${POS.map((x, n) => `<option value="${n}" ${n === p.position ? 'selected' : ''}>${x}</option>`).join('')}</select></label>
+      <label class="field">College<span style="display:flex;gap:6px;align-items:center">${logo ? `<img class="clogo" src="https://a.espncdn.com/i/teamlogos/ncaa/500/${logo}.png" alt="" onerror="this.remove()">` : ''}
+        <select class="input" data-pf="college">${colleges.map(([id, name]) => `<option value="${id}" ${id === p.college ? 'selected' : ''}>${esc(name)}</option>`).join('')}</select></span></label>
+      ${num('jersey', 'Jersey #', 0, 99)}${num('age', 'Age', 18, 40)}
+      <label class="field">Height<span style="display:flex;gap:6px"><select class="input" id="pFt">${[5, 6, 7, 8, 9, 10].map(v => `<option ${v === Math.floor(p.height / 12) ? 'selected' : ''}>${v}</option>`).join('')}</select>
+        <select class="input" id="pIn">${[...Array(12).keys()].map(v => `<option ${v === p.height % 12 ? 'selected' : ''}>${v}</option>`).join('')}</select></span></label>
+      ${num('weight', 'Weight (lb)', 160, 415)}${num('overall', 'Overall', 0, 99)}
+      ${num("draftRound", "Projected round (63 = undrafted)", 1, 63)}${num("draftPick", "Pick in round", 1, 300)}
+      <label class="field">Hometown<input class="input" data-pf="homeTown" maxlength="26" value="${esc(p.homeTown === 'PLACEHOLDER' ? '' : p.homeTown)}" placeholder="City, ST"></label>
+    </div>
+    <h4>Photo</h4>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button class="btn" id="pPhotoUp">📷 Upload photo</button>${custom ? '<button class="btn red" id="pPhotoDel">Remove photo</button>' : ''}
+      <input type="file" id="pPhotoFile" accept="image/png,image/jpeg,image/webp" hidden>
+      <small style="color:var(--muted)">Shows in this app. Madden uses its own faces.</small>
+    </div>
+    <h4>Development trait</h4>
+    <div class="dev">${DEV.map((d, n) => `<button style="--c:${d.color}" class="${p.devTrait === n ? 'on' : ''}" data-pdev="${n}">${d.name}</button>`).join('')}</div>
+    ${Object.entries(DRAFT_GROUPS).map(([g, fs]) => `<h4>${g}</h4><div class="ratings">${fs.map(f => {
+      const v = p.ratings[f] ?? 0, c = v >= 90 ? '#31d07a' : v >= 75 ? '#2f8bff' : v >= 60 ? '#d9a62e' : '#e0454f';
+      return `<label class="rate"><span>${ratingLabel(f)}</span><input class="input" type="number" min="0" max="99" data-pr="${f}" value="${v}"><div class="bar2"><i style="width:${v}%;background:${c}"></i></div></label>`; }).join('')}</div>`).join('')}`;
+  $('#pActions').innerHTML = `<button class="btn blue" id="pMax">Max all to 99</button>` + (p.added
+    ? `<button class="btn" id="pLook" title="Borrow another prospect's generic face and gear at this position (you'll see it in Madden)">🎲 Different face</button><button class="btn red" id="pDelete">Delete prospect</button>`
+    : `<button class="btn" id="pUndo">Undo edits</button>`) + `<div class="spacer"></div><button class="btn" data-close>Done</button>`;
+  $('#pMax').onclick = () => { for (const r of DRAFT_RATINGS) editProspect(i, r, 99); editProspect(i, 'overall', 99); saveDraft(); renderProspect(); renderDraft(true); };
+  $('#pPhotoUp').onclick = () => $('#pPhotoFile').click();
+  $('#pPhotoFile').onchange = e => { const f = e.target.files[0]; if (f) uploadPhoto(`${p.firstName} ${p.lastName}`, f); };
+  if ($('#pPhotoDel')) $('#pPhotoDel').onclick = () => savePhoto(`${p.firstName} ${p.lastName}`, null);
+  if (!p.added) { $('#pUndo').onclick = () => { delete draft.edits[i]; saveDraft(); renderProspect(); renderDraft(true); }; return; }
+  $('#pLook').onclick = () => {
+    const looks = draft.prospects.filter(x => x.position === p.position && !x.assetName && x.index !== p.template);
+    if (!looks.length) return toast('No other faces to borrow at this position');
+    p.template = looks[Math.floor(Math.random() * looks.length)].index; saveDraft(); toast('New face and gear');
+  };
+  $('#pDelete').onclick = () => {
+    draft.added.splice(i - draft.prospects.length, 1);
+    draft.added.forEach((a, n) => { a.index = draft.prospects.length + n; });
+    saveDraft(); closeAll(); renderDraft(true); toast(`${p.firstName} ${p.lastName} removed from the class`);
+  };
+}
+$('#pBody').addEventListener('change', e => {
+  const el = e.target, i = editingProspect;
+  if (el.dataset.pr) editProspect(i, el.dataset.pr, Math.max(0, Math.min(99, Number(el.value) || 0)));
+  else if (el.dataset.pf) editProspect(i, el.dataset.pf, el.type === 'number' || el.tagName === 'SELECT' ? Number(el.value) : el.value);
+  else if (el.id === 'pFt' || el.id === 'pIn') editProspect(i, 'height', Math.min(127, Number($('#pFt').value) * 12 + Number($('#pIn').value)));
+  else return;
+  saveDraft(); renderProspect(); renderDraft(true);
+});
+$('#pBody').addEventListener('click', e => { const b = e.target.closest('[data-pdev]'); if (b) { editProspect(editingProspect, 'devTrait', Number(b.dataset.pdev)); saveDraft(); renderProspect(); renderDraft(true); } });
+$('#draftExportBtn').onclick = () => {
+  $('#draftOutName').value = `${draft.file.replace(/^CAREERDRAFT-/, '')}Custom`.replace(/[^A-Za-z0-9]/g, '').slice(0, 24);
+  $('#draftExportSummary').textContent = `${draft.file}: ${Object.keys(draft.edits).length} prospects edited, ${draft.added.length} created.`;
+  $('#draftExportResult').innerHTML = '';
+  openModal('#draftExporter');
+};
+$('#doDraftExport').onclick = async () => {
+  const btn = $('#doDraftExport'); btn.disabled = true;
+  try {
+    const r = await api('/api/draft-export', { base: draft.file, outName: $('#draftOutName').value, edits: draft.edits, added: draft.added });
+    $('#draftExportResult').innerHTML = `<div style="color:#31d07a;font-weight:700">Saved ${esc(r.file)}: ${r.prospects} prospects (${r.created} created), ${r.changed} edited.</div>`;
+    Sound.fanfare(); toast('Draft class exported: ' + r.file);
+    const { drafts } = await api('/api/drafts');
+    $('#draftSel').innerHTML = drafts.map(d => `<option>${esc(d.name)}</option>`).join(''); $('#draftSel').value = draft.file;
+  } catch (e) { $('#draftExportResult').innerHTML = `<div style="color:var(--red)">${esc(e.message)}</div>`; Sound.error(); }
+  btn.disabled = false;
+};
+
+// ---- new prospects: a real college player from ESPN, or one you make up ----
+// ratings, size and projection start from a prospect at the same position; the look (face, gear) from one with a generic face
+function createProspect(fields, start) {
+  if (room() <= 0) return toast('This draft class is full', true);
+  const pos = fields.position;
+  const atPos = draft.prospects.filter(p => p.position === pos);
+  const byOvr = [...(atPos.length ? atPos : draft.prospects)].sort((a, b) => b.overall - a.overall);
+  const donor = start === 'top' ? byOvr[0] : byOvr[Math.floor(byOvr.length / 2)];
+  const looks = atPos.filter(p => !p.assetName);
+  const look = looks.length ? looks[Math.floor(Math.random() * looks.length)] : positionDonor(pos);
+  const known = Object.fromEntries(Object.entries(fields).filter(([, v]) => v !== null && v !== undefined && v !== '' && !Number.isNaN(v)));
+  const p = {
+    added: true, index: draft.prospects.length + draft.added.length, template: look.index, college: look.college, homeTown: '',
+    age: donor.age, height: donor.height, weight: donor.weight, jersey: donor.jersey, overall: donor.overall, devTrait: donor.devTrait,
+    draftRound: donor.draftRound, draftPick: donor.draftPick, ratings: { ...donor.ratings }, ...known,
+  };
+  if (start === 'max') { p.overall = 99; p.devTrait = 3; for (const r of DRAFT_RATINGS) p.ratings[r] = 99; }
+  draft.added.push(p); saveDraft(); closeAll(); renderDraft(true); openProspect(p.index);
+  Sound.fanfare(); toast(`${p.firstName} ${p.lastName} joined the class`);
+}
+let npFound = [];
+$('#newProspectBtn').onclick = () => {
+  $('#npPos').innerHTML = POS.map((x, i) => `<option value="${i}">${x}</option>`).join('');
+  $('#npResults').innerHTML = ''; $('#npFirst').value = ''; $('#npLast').value = '';
+  const left = room();
+  $('#npRoom').textContent = left > 0 ? `Room for ${left} more in this class. Your original file isn't changed until you export a new one.` : 'This class is full: delete a created prospect to make room.';
+  openModal('#newProspect'); $('#npSearch').focus();
+};
+async function searchProspects() {
+  const q = $('#npSearch').value.trim(); if (!q) return;
+  $('#npResults').innerHTML = '<div class="empty-state" style="padding:16px">Searching ESPN…</div>';
+  try { npFound = await api('/api/college-players?q=' + encodeURIComponent(q)); }
+  catch (e) { $('#npResults').innerHTML = `<div style="color:var(--red)">${esc(e.message)}</div>`; return; }
+  $('#npResults').innerHTML = npFound.map((r, n) => `
+    <div class="npres" style="animation-delay:${n * 40}ms">${headshot(r.headshot, silhouette(r.jersey))}
+      <div><b>${esc(r.firstName)} ${esc(r.lastName)}</b><br><small>${esc(r.espnPosition)} · ${esc(r.school)} · ${esc(r.experience)}${r.height ? ` · ${ht(r.height)}` : ''}${r.weight ? ` ${r.weight}` : ''}${r.hometown ? ` · ${esc(r.hometown)}` : ''}</small></div>
+      <button class="btn green" data-npadd="${n}">Add</button></div>`).join('') || '<div class="empty-state" style="padding:16px">No college players found by that name.</div>';
+}
+$('#npSearchBtn').onclick = searchProspects;
+$('#npSearch').addEventListener('keydown', e => { if (e.key === 'Enter') searchProspects(); });
+$('#npResults').addEventListener('click', e => {
+  const b = e.target.closest('[data-npadd]'); if (!b) return;
+  const r = npFound[Number(b.dataset.npadd)];
+  const college = collegeFor(r.schoolId);
+  createProspect({ firstName: r.firstName, lastName: r.lastName, position: r.position ?? Number($('#npPos').value), college, height: r.height, weight: r.weight,
+    age: r.age, jersey: r.jersey, homeTown: r.hometown.slice(0, 26), headshot: r.headshot, espnId: r.espnId }, $('#npStart').value);
+  if (college === null) toast(`${r.school} isn't in Madden's college list here. Pick his school in the editor.`);
+});
+$('#npCreate').onclick = () => {
+  const first = $('#npFirst').value.trim(), last = $('#npLast').value.trim();
+  if (!first || !last) return toast('Enter a first and last name', true);
+  createProspect({ firstName: first, lastName: last, position: Number($('#npPos').value) }, $('#npStart').value);
+};
+
+// ---- franchise saves (beta): dev traits, coach level and talents, ability ranks ----
+const ROLE_NAMES = { HeadCoach: 'Head Coach', OffensiveCoordinator: 'Offensive Coordinator', DefensiveCoordinator: 'Defensive Coordinator' };
+const RANK_COLORS = { Bronze: '#c08446', Silver: '#b8c0cc', Gold: '#e2b13c', Platinum: '#8fe0f0' };
+const COACH_MAX = 49;
+const words = s => String(s ?? '').replace(/([a-z])([A-Z])/g, '$1 $2');
+const posOrder = x => { const i = POS.indexOf(x); return i >= 0 ? i : x === 'LS' ? POS.length : 99; };
+const NO_EDITS = () => ({ players: {}, coaches: {}, abilities: {} });
+let fr = { file: null, data: null, team: 0, edits: NO_EDITS() }, frPlayers = new Map(), frCoaches = new Map(), frAbilities = new Map();
+// edits are kept per save and dropped once Madden rewrites that file, since its row numbers can change
+const saveFr = () => store.set(`rbf:${fr.file}`, { modified: fr.data.modified, edits: fr.edits });
+const frEdited = () => Object.keys(fr.edits.players).length + Object.keys(fr.edits.coaches).length + Object.keys(fr.edits.abilities).length;
+// effective values = save file + this session's edits
+const frDev = p => fr.edits.players[p.row]?.dev ?? p.dev;
+const frRank = a => fr.edits.abilities[a.row]?.rank ?? a.rank;
+const frCoach = c => ({ ...c, ...(fr.edits.coaches[c.row] || {}) });
+function setDev(p, dev) { if (dev === p.dev) delete fr.edits.players[p.row]; else fr.edits.players[p.row] = { dev }; }
+function setRank(a, rank) { if (rank === a.rank) delete fr.edits.abilities[a.row]; else fr.edits.abilities[a.row] = { rank }; }
+function setCoach(c, patch) {
+  const e = { ...(fr.edits.coaches[c.row] || {}), ...patch };
+  if (e.level === c.level) delete e.level;
+  if (!e.maxTalents) delete e.maxTalents;
+  if (Object.keys(e).length) fr.edits.coaches[c.row] = e; else delete fr.edits.coaches[c.row];
+}
+
+async function openFranchise() {
+  const { franchises, savesDir } = await api('/api/franchises');
+  if (!franchises.length) return toast(`No CAREER franchise saves in ${savesDir}`, true);
+  $('#frSel').innerHTML = franchises.map(f => `<option>${esc(f.name)}</option>`).join('');
+  const last = store.get('rb:lastFranchise'); if (last && franchises.some(f => f.name === last)) $('#frSel').value = last;
+  showScreen('#franchiseScreen');
+  await loadFranchise($('#frSel').value);
+}
+async function loadFranchise(file) {
+  for (const id of ['#frLogos', '#frHead', '#frCoaches']) $(id).innerHTML = '';
+  $('#frList').innerHTML = '<div class="empty-state"><div class="ball"></div>Reading franchise save…</div>';
+  let data;
+  try { data = await api('/api/franchise?file=' + encodeURIComponent(file)); }
+  catch (e) { $('#frList').innerHTML = `<div class="empty-state">${esc(e.message)}</div>`; return Sound.error(); }
+  const kept = store.get(`rbf:${file}`);
+  // open on the team you coach
+  fr = { file, data, team: data.coaches.find(c => c.user)?.team ?? data.teams[0]?.index ?? 0, edits: kept?.modified === data.modified ? { ...NO_EDITS(), ...kept.edits } : NO_EDITS() };
+  frPlayers = new Map(data.players.map(p => [p.row, p]));
+  frCoaches = new Map(data.coaches.map(c => [c.row, c]));
+  frAbilities = new Map(data.players.flatMap(p => p.abilities.map(a => [a.row, a])));
+  store.set('rb:lastFranchise', file);
+  $('#frSearch').value = ''; $('#frPos').value = '';
+  renderFranchise();
+}
+function frLogo(i) {
+  const n = NFL[i + 1], t = fr.data.teams.find(x => x.index === i);
+  return n ? `<img class="logo-img" src="https://a.espncdn.com/i/teamlogos/nfl/500/${n[0]}.png" alt="${esc(t?.abbr)}" data-bg="#26324f" onerror="logoFailed(this)">`
+    : `<div class="logo-txt" style="background:#26324f">${esc(t?.abbr || '?')}</div>`;
+}
+function frPhoto(p) {
+  const name = `${p.first} ${p.last}`, k = normName(name), url = customShots[k] || shots[k];
+  if (!url && shotsReady) queuePlayerPhoto(name, k);
+  const t = roster && team(p.team + 1); // franchise team index = roster team id - 1
+  return headshot(url, silhouette(p.jersey, t?.primary, t?.secondary), '', k);
+}
+function renderFranchise(quiet) {
+  const d = fr.data, t = d.teams.find(x => x.index === fr.team) || { city: '', name: '?' };
+  const mine = new Set(d.coaches.filter(c => c.user).map(c => c.team));
+  $('#frLogos').innerHTML = ['AFC', 'NFC'].map(cf => DIVS.flatMap(dv => Object.entries(NFL).filter(([, n]) => n[1] === cf && n[2] === dv).map(([id]) => Number(id) - 1))
+    .map(i => d.teams.find(x => x.index === i)).filter(Boolean)
+    .map(x => `<div class="lg ${x.index === fr.team ? 'on' : ''}" data-frteam="${x.index}" title="${esc(x.city)} ${esc(x.name)}${mine.has(x.index) ? ' (your team)' : ''}">${frLogo(x.index)}${mine.has(x.index) ? '<i class="me"></i>' : ''}</div>`).join('')).join('<div class="sep"></div>');
+  const squad = d.players.filter(p => p.team === fr.team);
+  const devCount = [0, 0, 0, 0]; for (const p of squad) devCount[frDev(p)]++;
+  $('#frHead').innerHTML = `
+    <div class="fr-head ${quiet ? '' : 'anim'}">
+      <div class="flogo">${frLogo(fr.team)}</div>
+      <div><div class="sub">${esc(t.city)}</div><h1 class="cond">${esc(t.name).toUpperCase()}${mine.has(fr.team) ? '<span class="youbadge">YOUR TEAM</span>' : ''}</h1>
+        <div class="sub">${squad.length} players · ${squad.reduce((n, p) => n + p.abilities.length, 0)} abilities · ${frEdited()} edits in this save</div></div>
+      <div class="spacer"></div>
+      <div class="devcounts" style="width:min(320px,100%);margin:0">${DEV.map((dv, i) => `<div style="--dev:${dv.color}"><b>${devCount[i]}</b><small>${dv.name}</small></div>`).join('')}</div>
+    </div>
+    <div class="funbar" style="justify-content:flex-start">
+      <span>TEAM</span>
+      <button class="btn" data-fq="xf">All X-Factor</button>
+      <button class="btn" data-fq="ss">All Superstar</button>
+      <button class="btn" data-fq="plat">Abilities to Platinum</button>
+      <button class="btn" data-fq="coaches">Max all coaches</button>
+      <button class="btn" data-fq="undo">Undo team edits</button>
+    </div>`;
+  renderFrCoaches(quiet);
+  renderFrList(quiet);
+}
+function renderFrCoaches(quiet) {
+  const staff = fr.data.coaches.filter(c => c.team === fr.team);
+  $('#frCoaches').innerHTML = Object.keys(ROLE_NAMES).map((role, n) => {
+    const base = staff.find(c => c.role === role);
+    if (!base) return `<div class="coach vacant ${quiet ? '' : 'anim'}" style="--i:${n}"><div class="role">${ROLE_NAMES[role]}</div><div class="cname">Vacant</div><small>Nobody holds this job in the save right now. Hire one in Madden.</small></div>`;
+    const c = frCoach(base), owned = c.maxTalents ? base.tiersTotal : base.tiersOwned, allOwned = base.tiersOwned >= base.tiersTotal;
+    return `<div class="coach ${fr.edits.coaches[c.row] ? 'edited' : ''} ${quiet ? '' : 'anim'}" style="--i:${n}">
+      <div class="role">${ROLE_NAMES[role]}${c.user ? '<span class="youbadge">YOU</span>' : ''}</div>
+      <div class="cname">${esc(c.first)} ${esc(c.last)}</div>
+      <div class="arch">${esc(words(c.archetype))}</div>
+      <div class="lvl"><div class="ring ${c.level >= COACH_MAX ? 'max' : ''}" id="ring${c.row}">${c.level}</div>
+        <div style="flex:1"><small>Level (max ${COACH_MAX})</small><input type="range" min="${base.level}" max="${COACH_MAX}" value="${c.level}" data-clevel="${c.row}"></div></div>
+      <small>Talents: ${owned} of ${base.tiersTotal} tiers owned across ${base.talents} talents</small>
+      <div class="tbar"><i style="width:${base.tiersTotal ? owned / base.tiersTotal * 100 : 0}%"></i></div>
+      <div class="cbtns">
+        <button class="btn blue" data-cmax="${c.row}" ${c.level >= COACH_MAX ? 'disabled' : ''}>Max level</button>
+        <button class="btn" data-ctal="${c.row}" ${allOwned ? 'disabled' : ''}>${allOwned ? 'All talents owned' : c.maxTalents ? 'Undo talents' : 'Unlock every talent'}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function renderFrList(quiet) {
+  const q = $('#frSearch').value.trim().toLowerCase(), pos = $('#frPos').value;
+  // searching looks across the whole league; otherwise it's the selected team
+  const pool = q ? fr.data.players.filter(p => `${p.first} ${p.last}`.toLowerCase().includes(q)) : fr.data.players.filter(p => p.team === fr.team);
+  const positions = [...new Set(pool.map(p => p.position))].sort((a, b) => posOrder(a) - posOrder(b));
+  $('#frPos').innerHTML = '<option value="">All positions</option>' + positions.map(x => `<option ${x === pos ? 'selected' : ''}>${esc(x)}</option>`).join('');
+  const list = pool.filter(p => !pos || p.position === pos).sort((a, b) => b.ovr - a.ovr);
+  $('#frList').innerHTML = list.slice(0, 200).map((p, n) => {
+    const dev = frDev(p), edited = fr.edits.players[p.row] || p.abilities.some(a => fr.edits.abilities[a.row]);
+    return `<div class="frrow ${dev === 3 ? 'xf' : ''} ${edited ? 'edited' : ''} ${quiet ? '' : 'anim'}" style="--i:${Math.min(n, 24)};--dev:${DEV[dev].color}">
+      ${frPhoto(p)}<div class="o">${p.ovr}</div>
+      <div><b>${esc(p.first)} ${esc(p.last)}</b><small>${esc(p.position)} · #${p.jersey} · age ${p.age}${q ? ' · ' + esc(fr.data.teams.find(t => t.index === p.team)?.abbr || '') : ''}${p.ps ? ' · practice squad' : ''}</small></div>
+      <div class="seg">${DEV.map((dv, i) => `<button style="--c:${dv.color}" class="${dev === i ? 'on' : ''}" data-fdev="${i}" data-row="${p.row}" title="${dv.name}">${['N', 'S', 'SS', 'XF'][i]}</button>`).join('')}</div>
+      <div class="abil">${p.abilities.length ? p.abilities.map((a, n) => { const r = frRank(a); return `<select data-abil="${a.row}" style="--rk:${RANK_COLORS[r] || '#888'}" title="Ability ${n + 1}${a.active ? '' : ' (not equipped)'}">${Object.keys(RANK_COLORS).map(k => `<option value="${k}" ${k === r ? 'selected' : ''}>${n + 1} · ${k}</option>`).join('')}</select>`; }).join('') : '<span class="none">No abilities</span>'}</div>
+    </div>`;
+  }).join('') + (list.length > 200 ? `<div class="empty-state" style="padding:20px">Showing 200 of ${list.length}. Search to narrow it down.</div>` : '') || '<div class="empty-state">No players match.</div>';
+}
+function frQuick(op) {
+  const squad = fr.data.players.filter(p => p.team === fr.team), staff = fr.data.coaches.filter(c => c.team === fr.team);
+  if (op === 'xf' || op === 'ss') { for (const p of squad) setDev(p, op === 'xf' ? 3 : 2); toast(`${squad.length} players set to ${op === 'xf' ? 'X-Factor' : 'Superstar'}`); if (op === 'xf') Sound.stinger(); }
+  else if (op === 'plat') { let n = 0; for (const p of squad) for (const a of p.abilities) { setRank(a, 'Platinum'); n++; } toast(n ? `${n} abilities set to Platinum` : 'No abilities on this team'); if (n) Sound.ting(); }
+  else if (op === 'coaches') { for (const c of staff) setCoach(c, { level: COACH_MAX, maxTalents: c.tiersOwned < c.tiersTotal }); toast(staff.length ? `${staff.length} coach${staff.length === 1 ? '' : 'es'} maxed` : 'This team has no coaches right now', !staff.length); if (staff.length) Sound.fanfare(); }
+  else if (op === 'undo') { for (const p of squad) { delete fr.edits.players[p.row]; for (const a of p.abilities) delete fr.edits.abilities[a.row]; } for (const c of staff) delete fr.edits.coaches[c.row]; toast('Team edits undone'); }
+  saveFr(); renderFranchise(true);
+}
+$('#frSel').onchange = e => loadFranchise(e.target.value);
+$('#openFranchise').onclick = () => openFranchise().catch(e => toast(e.message, true));
+$('#openFranchise2').onclick = () => openFranchise().catch(e => toast(e.message, true));
+$('#frBack').onclick = () => { if (st) showScreen('#builder'); else { renderConferences(); showScreen('#confScreen'); } };
+$('#frReset').onclick = () => { if (!fr.data) return; fr.edits = NO_EDITS(); saveFr(); renderFranchise(true); toast('Every edit to this save was cleared'); };
+for (const id of ['#frSearch', '#frPos']) $(id).addEventListener('input', () => renderFrList());
+$('#franchiseScreen').addEventListener('click', e => {
+  const tm = e.target.closest('[data-frteam]');
+  if (tm) { fr.team = Number(tm.dataset.frteam); $('#frSearch').value = ''; $('#frPos').value = ''; renderFranchise(); return; }
+  const dv = e.target.closest('[data-fdev]');
+  if (dv) { const v = Number(dv.dataset.fdev); setDev(frPlayers.get(Number(dv.dataset.row)), v); if (v === 3) Sound.stinger(); saveFr(); renderFranchise(true); return; }
+  const cm = e.target.closest('[data-cmax]');
+  if (cm) { setCoach(frCoaches.get(Number(cm.dataset.cmax)), { level: COACH_MAX }); Sound.fanfare(); saveFr(); renderFranchise(true); return; }
+  const ct = e.target.closest('[data-ctal]');
+  if (ct) { const c = frCoaches.get(Number(ct.dataset.ctal)); setCoach(c, { maxTalents: !fr.edits.coaches[c.row]?.maxTalents }); Sound.chime(); saveFr(); renderFranchise(true); return; }
+  const q = e.target.closest('[data-fq]');
+  if (q) frQuick(q.dataset.fq);
+});
+$('#franchiseScreen').addEventListener('change', e => {
+  const ab = e.target.closest('[data-abil]');
+  if (ab) { setRank(frAbilities.get(Number(ab.dataset.abil)), ab.value); Sound.ting(); saveFr(); renderFranchise(true); return; }
+  const lv = e.target.closest('[data-clevel]');
+  if (lv) { const v = Number(lv.value); setCoach(frCoaches.get(Number(lv.dataset.clevel)), { level: v }); if (v >= COACH_MAX) Sound.fanfare(); saveFr(); renderFranchise(true); }
+});
+// live level number while dragging the slider
+$('#franchiseScreen').addEventListener('input', e => {
+  const lv = e.target.closest('[data-clevel]'); if (!lv) return;
+  const ring = $('#ring' + lv.dataset.clevel); ring.textContent = lv.value; ring.classList.toggle('max', Number(lv.value) >= COACH_MAX); Sound.tick();
+});
+$('#frExportBtn').onclick = () => {
+  if (!fr.data) return;
+  const mine = fr.data.teams.find(t => t.index === fr.data.coaches.find(c => c.user)?.team);
+  // autosaves are named by date; suggest your team instead
+  const stem = fr.file.replace(/^CAREER-/, '').replace(/-?AUTOSAVE$/i, '').replace(/^[A-Z]{3}\d{2}-\d{2}h\d{2}m\d{2}[ap]$/i, '');
+  $('#frOutName').value = `${stem || mine?.abbr || 'MY'}EDITED`.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 24);
+  const n = Object.fromEntries(Object.entries(fr.edits).map(([k, v]) => [k, Object.keys(v).length]));
+  $('#frExportSummary').innerHTML = `<b>${esc(fr.file)}</b><br>${n.players} dev trait change${n.players === 1 ? '' : 's'} · ${n.coaches} coach${n.coaches === 1 ? '' : 'es'} · ${n.abilities} ability rank${n.abilities === 1 ? '' : 's'}`;
+  $('#frExportResult').innerHTML = frEdited() ? '' : '<div style="color:var(--muted)">Nothing to save yet. Make some changes first.</div>';
+  $('#doFrExport').disabled = !frEdited();
+  openModal('#frExporter');
+};
+$('#doFrExport').onclick = async () => {
+  const btn = $('#doFrExport'); btn.disabled = true; btn.textContent = 'Saving and checking…';
+  try {
+    const r = await api('/api/franchise-export', { base: fr.file, outName: $('#frOutName').value, edits: fr.edits });
+    $('#frExportResult').innerHTML = `<div style="color:#31d07a;font-weight:700">Saved ${esc(r.file)} and checked every edit.</div>` +
+      `<div class="notes" style="margin-top:8px">${r.notes.map(esc).join('<br>')}</div><p style="color:var(--muted);font-size:12px">In Madden: Franchise → Load, then pick ${esc(r.file.replace(/^CAREER-/, ''))}.</p>`;
+    Sound.fanfare(); toast('Franchise saved: ' + r.file);
+    const { franchises } = await api('/api/franchises');
+    $('#frSel').innerHTML = franchises.map(f => `<option>${esc(f.name)}</option>`).join(''); $('#frSel').value = fr.file;
+  } catch (e) { $('#frExportResult').innerHTML = `<div style="color:var(--red)">${esc(e.message)}</div>`; Sound.error(); }
+  btn.disabled = false; btn.textContent = 'Save';
+};
+
 // ---- sound (synthesized with Web Audio; no files) ----
 const Sound = (() => {
-  let ctx = null, muted = store.get('rb:muted') === true, lastTick = 0;
+  let ctx = null, master = null, muted = store.get('rb:muted') === true, lastTick = 0;
   const ac = () => {
     if (muted) return null;
-    try { ctx ??= new (window.AudioContext || window.webkitAudioContext)(); if (ctx.state === 'suspended') ctx.resume(); } catch { return null; }
+    try {
+      ctx ??= new (window.AudioContext || window.webkitAudioContext)();
+      if (ctx.state === 'suspended') ctx.resume();
+      // everything plays through one master volume
+      if (!master) { master = ctx.createGain(); master.gain.value = 1.6; master.connect(ctx.destination); }
+    } catch { return null; }
     return ctx;
   };
   // one oscillator note: frequency (or [from, to] sweep), length, volume, wave, start offset
@@ -1080,7 +1846,7 @@ const Sound = (() => {
     o.type = type;
     if (Array.isArray(freq)) { o.frequency.setValueAtTime(freq[0], t); o.frequency.exponentialRampToValueAtTime(freq[1], t + len); } else o.frequency.setValueAtTime(freq, t);
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .008); g.gain.exponentialRampToValueAtTime(.0001, t + len);
-    o.connect(g).connect(c.destination); o.start(t); o.stop(t + len + .02);
+    o.connect(g).connect(master); o.start(t); o.stop(t + len + .02);
     return o;
   }
   // band-passed noise sweep: whooshes and crowd swells
@@ -1092,13 +1858,20 @@ const Sound = (() => {
     src.buffer = buf; f.type = 'bandpass'; f.Q.value = 1.4;
     f.frequency.setValueAtTime(from, t); f.frequency.exponentialRampToValueAtTime(to, t + len);
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + len * .3); g.gain.exponentialRampToValueAtTime(.0001, t + len);
-    src.connect(f).connect(g).connect(c.destination); src.start(t); src.stop(t + len);
+    src.connect(f).connect(g).connect(master); src.start(t); src.stop(t + len);
   }
   return {
     get muted() { return muted; },
     toggle() { muted = !muted; store.set('rb:muted', muted); if (!muted) this.click(); return muted; },
-    tick() { const n = performance.now(); if (n - lastTick < 45) return; lastTick = n; tone(2300, .03, .018, 'sine'); },
-    click() { tone([520, 260], .07, .05, 'triangle'); },
+    tick() { const n = performance.now(); if (n - lastTick < 45) return; lastTick = n; tone(2300, .035, .035, 'sine'); },
+    click() { tone([520, 260], .08, .08, 'triangle'); },
+    // intro sounds
+    boom() { tone([140, 38], .9, .3, 'sine'); noise(.5, .16, 1800, 120); },
+    crowd(len = 2.4) { noise(len, .11, 500, 1400); noise(len * .9, .07, 1500, 900, .15); },
+    clunk() { noise(.14, .22, 220, 90); tone([90, 50], .25, .2, 'square'); },
+    hum() { tone([60, 240], 1.2, .08, 'sawtooth'); tone([120, 480], 1.2, .04, 'triangle'); },
+    stinger() { [[392, 0], [523, .16], [784, .32]].forEach(([f, at]) => { tone(f, at === .32 ? .9 : .2, .07, 'sawtooth', at); tone(f * 2, at === .32 ? .9 : .2, .03, 'triangle', at); }); },
+    ting() { tone(2400, .9, .07, 'sine'); tone(3620, .7, .04, 'sine', .01); },
     whoosh() { noise(.32, .09, 400, 3200); },
     select() { noise(.25, .06, 900, 2600); tone([440, 880], .14, .035, 'sine', .02); },
     whistle() { // referee whistle: high tone with fast flutter
@@ -1115,14 +1888,14 @@ const syncMuteButtons = () => { for (const b of document.querySelectorAll('[data
 syncMuteButtons();
 document.addEventListener('click', e => { if (e.target.closest('[data-mute]')) { Sound.toggle(); syncMuteButtons(); } });
 // hover ticks and click feedback on anything interactive
-const HOVERABLE = '[data-tile], [data-logo], [data-conf], .card, .slot, .pick, .btn, .tab, .dev button';
+const HOVERABLE = '[data-tile], [data-logo], [data-frteam], [data-conf], .card, .slot, .pick, .btn, .tab, .dev button, .seg button, .prospect, .npres';
 document.addEventListener('pointerover', e => { const el = e.target.closest(HOVERABLE); if (el && !el.contains(e.relatedTarget)) Sound.tick(); });
 document.addEventListener('click', e => {
   if (e.target.closest('[data-mute]')) return;
   if (e.target.closest('[data-conf]')) Sound.whoosh();
-  else if (e.target.closest('[data-logo], #editTeam')) Sound.whistle();
-  else if (e.target.closest('[data-tile], .tab, .card, .slot, .pick')) Sound.select();
-  else if (e.target.closest('.btn, .dev button')) Sound.click();
+  else if (e.target.closest('[data-logo], [data-frteam], #editTeam')) Sound.whistle();
+  else if (e.target.closest('[data-tile], .tab, .card, .slot, .pick, .prospect')) Sound.select();
+  else if (e.target.closest('.btn, .dev button, .seg button')) Sound.click();
 }, true);
 // hook result sounds into existing feedback
 const plainToast = toast;
