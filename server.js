@@ -7,7 +7,10 @@ const os = require('node:os');
 const { execFile } = require('node:child_process');
 const { summarize, summarizeLegends, exportRoster } = require('./lib/roster');
 const { leagueChaos } = require('./lib/league');
-const { legendPhotos, prefetchAll, cachedPhotos } = require('./lib/photos');
+const { playerPhotos, prospectPhotos, prefetchAll, cachedPhotos } = require('./lib/photos');
+const { readDraftClass, writeDraftClass } = require('./lib/draft');
+const { summarizeFranchise, applyFranchiseEdits } = require('./lib/franchise');
+const { searchCollegePlayers } = require('./lib/college');
 const { fetchNfl, syncRoster, normName } = require('./lib/sync');
 
 const args = process.argv.slice(2);
@@ -16,10 +19,12 @@ const PORT = Number(flag('--port') ?? 8790);
 const OPEN = !args.includes('--no-open');
 let savesDir = flag('--saves') ?? path.join(os.homedir(), 'Documents', 'Madden NFL 27', 'saves');
 
-function loadUi() {
-  try { const sea = require('node:sea'); if (sea.isSea()) return sea.getAsset('index.html', 'utf8'); } catch {}
-  return fs.readFileSync(path.join(__dirname, 'ui', 'index.html'), 'utf8');
+// from the exe's embedded assets, or the source tree when run with node
+function bundled(asset, file) {
+  try { const sea = require('node:sea'); if (sea.isSea()) return sea.getAsset(asset, 'utf8'); } catch {}
+  return fs.readFileSync(path.join(__dirname, file), 'utf8');
 }
+const loadUi = () => bundled('index.html', path.join('ui', 'index.html'));
 
 const cache = new Map();
 function rosterInfo(file) {
@@ -80,6 +85,11 @@ function saveCustomPhoto(name, dataUrl) {
   fs.writeFileSync(path.join(PHOTO_DIR, `${key}.${m[1] === 'jpeg' ? 'jpg' : m[1]}`), bytes);
 }
 
+// Your own intro clips: any .mp4/.webm here joins the random intro rotation (local only)
+const INTRO_DIR = path.join(process.env.APPDATA || os.homedir(), 'RosterBuilder', 'intros');
+const INTRO_TYPES = { mp4: 'video/mp4', webm: 'video/webm' };
+const listIntros = () => fs.existsSync(INTRO_DIR) ? fs.readdirSync(INTRO_DIR).filter(f => /\.(mp4|webm)$/i.test(f)) : [];
+
 // Madden lists a roster by the text after the last dash in its file name, so new names are letters and digits only
 function rosterPath(raw) {
   const name = String(raw ?? '').replace(/^ROSTER-/i, '').replace(/[^A-Za-z0-9]/g, '').slice(0, 24);
@@ -87,6 +97,22 @@ function rosterPath(raw) {
   return path.join(savesDir, 'ROSTER-' + name);
 }
 const legendsFile = () => listRosters().map(r => r.name).find(n => /legend/i.test(n));
+const listDrafts = () => fs.existsSync(savesDir) ? fs.readdirSync(savesDir).filter(f => /^CAREERDRAFT-/.test(f))
+  .map(f => ({ name: f, modified: fs.statSync(path.join(savesDir, f)).mtimeMs })).sort((a, b) => a.name.localeCompare(b.name)) : [];
+// franchise saves are CAREER-<name> (draft classes are CAREERDRAFT-, so they never match)
+const listFranchises = () => fs.existsSync(savesDir) ? fs.readdirSync(savesDir).filter(f => /^CAREER-/.test(f))
+  .map(f => ({ name: f, modified: fs.statSync(path.join(savesDir, f)).mtimeMs })).sort((a, b) => b.modified - a.modified) : [];
+const franchiseCache = new Map();
+async function franchiseInfo(file) {
+  const full = path.join(savesDir, path.basename(file));
+  const mtime = fs.statSync(full).mtimeMs;
+  const hit = franchiseCache.get(full);
+  if (hit && hit.mtime === mtime) return hit.json;
+  // modified lets the app drop saved edits once Madden rewrites the file (row numbers can move)
+  const json = JSON.stringify({ ...(await summarizeFranchise(full)), modified: mtime });
+  franchiseCache.set(full, { mtime, json });
+  return json;
+}
 
 const send = (res, code, body, type = 'application/json') => { res.writeHead(code, { 'content-type': type, 'cache-control': 'no-store' }); res.end(body); };
 const readBody = req => new Promise((ok, fail) => { let s = ''; req.on('data', c => { s += c; if (s.length > 20e6) req.destroy(); }); req.on('end', () => { try { ok(JSON.parse(s || '{}')); } catch (e) { fail(e); } }); });
@@ -95,6 +121,7 @@ const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, 'http://localhost');
     if (req.method === 'GET' && url.pathname === '/') return send(res, 200, loadUi(), 'text/html; charset=utf-8');
+    if (req.method === 'GET' && url.pathname === '/licenses') return send(res, 200, bundled('THIRD-PARTY-NOTICES.md', 'THIRD-PARTY-NOTICES.md'), 'text/plain; charset=utf-8');
     if (req.method === 'GET' && url.pathname === '/api/rosters') return send(res, 200, JSON.stringify({ savesDir, rosters: listRosters() }));
     if (req.method === 'POST' && url.pathname === '/api/saves-dir') {
       const { dir } = await readBody(req);
@@ -151,9 +178,56 @@ const server = http.createServer(async (req, res) => {
       if (!ext || !fs.existsSync(full)) return send(res, 404, 'not found', 'text/plain');
       return send(res, 200, fs.readFileSync(full), PHOTO_TYPES[ext]);
     }
-    if (req.method === 'POST' && url.pathname === '/api/legend-photos') {
+    if (req.method === 'GET' && url.pathname === '/api/intros') return send(res, 200, JSON.stringify({ videos: listIntros() }));
+    if (req.method === 'GET' && url.pathname.startsWith('/intros/')) {
+      const f = path.basename(decodeURIComponent(url.pathname.slice(8)));
+      const ext = /\.(mp4|webm)$/i.exec(f)?.[1]?.toLowerCase();
+      const full = path.join(INTRO_DIR, f);
+      if (!ext || !fs.existsSync(full)) return send(res, 404, 'not found', 'text/plain');
+      res.writeHead(200, { 'content-type': INTRO_TYPES[ext], 'content-length': fs.statSync(full).size });
+      return fs.createReadStream(full).pipe(res);
+    }
+    if (req.method === 'POST' && url.pathname === '/api/open-intros') {
+      fs.mkdirSync(INTRO_DIR, { recursive: true });
+      execFile('explorer.exe', [INTRO_DIR], () => {});
+      return send(res, 200, JSON.stringify({ dir: INTRO_DIR }));
+    }
+    if (req.method === 'GET' && url.pathname === '/api/drafts') return send(res, 200, JSON.stringify({ savesDir, drafts: listDrafts() }));
+    if (req.method === 'GET' && url.pathname === '/api/draft') {
+      return send(res, 200, JSON.stringify(readDraftClass(path.join(savesDir, path.basename(url.searchParams.get('file') ?? '')))));
+    }
+    if (req.method === 'POST' && url.pathname === '/api/draft-export') {
+      const body = await readBody(req);
+      const name = String(body.outName ?? '').replace(/^CAREERDRAFT-/i, '').replace(/[^A-Za-z0-9]/g, '').slice(0, 24);
+      if (!name) throw new Error('Enter a name for the new draft class');
+      const out = path.join(savesDir, 'CAREERDRAFT-' + name);
+      const result = writeDraftClass(path.join(savesDir, path.basename(body.base)), out, body.edits, Array.isArray(body.added) ? body.added : []);
+      return send(res, 200, JSON.stringify({ ...result, file: path.basename(out) }));
+    }
+    // Madden's college numbers -> [name, ESPN team id], built by tools/build-colleges.js
+    if (req.method === 'GET' && url.pathname === '/api/colleges') return send(res, 200, bundled('colleges.json', path.join('lib', 'colleges.json')));
+    if (req.method === 'GET' && url.pathname === '/api/college-players') {
+      const q = String(url.searchParams.get('q') ?? '').trim().slice(0, 60);
+      return send(res, 200, JSON.stringify(q ? await searchCollegePlayers(q) : []));
+    }
+    if (req.method === 'GET' && url.pathname === '/api/franchises') return send(res, 200, JSON.stringify({ savesDir, franchises: listFranchises() }));
+    if (req.method === 'GET' && url.pathname === '/api/franchise') return send(res, 200, await franchiseInfo(url.searchParams.get('file') ?? ''));
+    if (req.method === 'POST' && url.pathname === '/api/franchise-export') {
+      const body = await readBody(req);
+      // same rule as rosters: letters and digits only after CAREER-
+      const name = String(body.outName ?? '').replace(/^CAREER-/i, '').replace(/[^A-Za-z0-9]/g, '').slice(0, 24);
+      if (!name) throw new Error('Enter a name for the new franchise save');
+      const out = path.join(savesDir, 'CAREER-' + name);
+      const result = await applyFranchiseEdits(path.join(savesDir, path.basename(body.base)), out, body.edits ?? {});
+      return send(res, 200, JSON.stringify(result));
+    }
+    if (req.method === 'POST' && url.pathname === '/api/prospect-photos') {
       const { names } = await readBody(req);
-      return send(res, 200, JSON.stringify(await legendPhotos((names ?? []).map(String).slice(0, 60))));
+      return send(res, 200, JSON.stringify(await prospectPhotos((names ?? []).map(String).slice(0, 80))));
+    }
+    if (req.method === 'POST' && url.pathname === '/api/player-photos') {
+      const { names } = await readBody(req);
+      return send(res, 200, JSON.stringify(await playerPhotos((names ?? []).map(String).slice(0, 60))));
     }
     if (req.method === 'POST' && url.pathname === '/api/league') {
       const body = await readBody(req);
@@ -176,6 +250,8 @@ server.listen(PORT, '127.0.0.1', () => {
   if (!OPEN) return;
   // app-style window in Edge if available, otherwise the default browser
   const edge = ['C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe', 'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe'].find(p => fs.existsSync(p));
-  if (edge) execFile(edge, [`--app=${url}`, '--window-size=1500,950'], () => {});
+  // own Edge profile: a separate Edge process, so the flag letting the intro play sound before the first click always applies
+  const profile = path.join(process.env.APPDATA || os.homedir(), 'RosterBuilder', 'edge-profile');
+  if (edge) execFile(edge, [`--app=${url}`, `--user-data-dir=${profile}`, '--window-size=1500,950', '--autoplay-policy=no-user-gesture-required', '--no-first-run'], () => {});
   else execFile('cmd', ['/c', 'start', '', url], () => {});
 });
