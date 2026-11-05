@@ -56,8 +56,8 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
 .btn { border: 1px solid var(--line); background: var(--panel2); border-radius: 6px; padding: 7px 14px; transition: border-color .15s, transform .15s, filter .15s; }
 .btn:hover { border-color: var(--blue); transform: translateY(-1px); }
 .btn:active { transform: none; }
-.btn.green { background: var(--green); border-color: var(--green); font-weight: 600; }
-.btn.blue { background: var(--blue); border-color: var(--blue); font-weight: 600; }
+.btn.green { background: var(--green); border-color: var(--green); font-weight: 600; color: #fff; }
+.btn.blue { background: var(--blue); border-color: var(--blue); font-weight: 600; color: #fff; }
 .btn.red { color: #ff9aa0; }
 .btn.warn { background: #5a1820; border-color: var(--red); }
 .logo-img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 6px #0008); }
@@ -671,7 +671,7 @@ const posName = i => POS[i] ?? 'ST';
 const ordinal = n => n + (['th','st','nd','rd'][(n % 100 - 20) % 10] || ['th','st','nd','rd'][n % 100] || 'th');
 // ESPN logo; offline it falls back to the abbreviation on the team color
 function logo(teamId, cls = 'logo-img') {
-  const n = NFL[teamId]; const t = team(teamId);
+  const n = NFL[teamId]; const t = roster ? team(teamId) : null;
   const fallback = `<div class="logo-txt" style="background:${hex(t?.primary || [40, 50, 80])}">${esc(t?.abbr || '?')}</div>`;
   return n ? `<img class="${cls}" src="https://a.espncdn.com/i/teamlogos/nfl/500/${n[0]}.png" alt="${esc(t?.abbr)}" data-bg="${hex(t?.primary || [40, 50, 80])}" onerror="logoFailed(this)">` : fallback;
 }
@@ -753,10 +753,10 @@ async function boot() {
   try {
     splash(15, 'Finding your Madden rosters…');
     const { rosters, savesDir } = await api('/api/rosters');
+    savesInfo.dir = savesDir;
     $('#rosterSel').innerHTML = rosters.map(r => `<option>${esc(r.name)}</option>`).join('');
     if (!rosters.length) {
       splash(100, 'No rosters found');
-      $('#confRow').innerHTML = `<div class="empty-state" style="grid-column:1/-1">No ROSTER files found in<br><b>${esc(savesDir)}</b><br><br>Use "Saves folder" to pick where Madden keeps them.</div>`;
     } else {
       const last = store.get('rb:lastRoster');
       if (last && rosters.some(r => r.name === last)) $('#rosterSel').value = last;
@@ -766,12 +766,13 @@ async function boot() {
       await loadCustomPhotos();
       await Promise.race([loadPhotos(), new Promise(r => setTimeout(r, 4000))]);
     }
-  } catch (e) { toast(e.message, true); }
+  } catch (e) { savesInfo.error = e.message; toast(e.message, true); }
   splash(100, 'Ready');
   await intro;
   await new Promise(r => setTimeout(r, Math.max(0, 1300 - (Date.now() - started))));
   $('#splash').classList.add('done');
-  renderConferences(); showScreen('#confScreen');
+  // the first screen always appears, even if drawing it fails
+  try { renderConferences(); } finally { showScreen('#confScreen'); }
 }
 
 async function loadRoster(file) {
@@ -828,7 +829,18 @@ function rankings() {
 }
 
 // ---- 1. conference screen ----
+// what boot found: the saves folder, and why no roster loaded, if none did
+let savesInfo = { dir: '', error: '' };
 function renderConferences() {
+  // no roster (none saved yet, a different saves folder, or one that won't read): say so and offer the fix
+  if (!roster) {
+    $('#confRow').innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      ${savesInfo.error ? `Couldn't read <b>${esc($('#rosterSel').value)}</b>: ${esc(savesInfo.error)}<br>Pick another roster at the top right.`
+        : `No Madden roster files found in<br><b>${esc(savesInfo.dir)}</b><br><br>Save a roster in Madden NFL 27 and it shows up here, or choose the folder where your Madden saves are.`}
+      <div style="margin-top:18px"><button class="btn blue" data-pickfolder>Choose saves folder</button></div>
+      <div style="margin-top:14px;font-size:12px">Draft classes and Franchise (top right) work without a roster.</div></div>`;
+    return;
+  }
   $('#confRow').innerHTML = ['AFC', 'NFC'].map((c, ci) => `
     <div class="conf ${c.toLowerCase()} anim" style="--i:${ci * 3}" data-conf="${c}">
       <h2>${c}</h2><div class="full">${c === 'AFC' ? 'American' : 'National'} Football Conference</div>
@@ -1290,11 +1302,20 @@ $('#resetAllBtn').onclick = () => {
   st = freshState(st.base, st.teamId); render();
   toast(`All teams reset (${gone.length} edited team${gone.length === 1 ? '' : 's'} cleared)`);
 };
-$('#folderBtn').onclick = async () => {
-  const dir = prompt('Folder where Madden keeps ROSTER files:');
-  if (!dir) return;
-  try { await api('/api/saves-dir', { dir }); location.reload(); } catch (e) { toast(e.message, true); }
-};
+// Windows' folder picker; if it can't open, type the path instead. The choice is remembered.
+async function pickSavesFolder() {
+  try {
+    let r = await api('/api/saves-dir', { pick: true });
+    if (r.unavailable) {
+      const dir = prompt('Folder where Madden keeps its saves (ROSTER files):', r.savesDir);
+      if (!dir) return;
+      r = await api('/api/saves-dir', { dir });
+    }
+    if (!r.cancelled) location.reload();
+  } catch (e) { toast(e.message, true); }
+}
+$('#folderBtn').onclick = pickSavesFolder;
+document.addEventListener('click', e => { if (e.target.closest('[data-pickfolder]')) pickSavesFolder(); });
 $('#exportBtn').onclick = () => {
   if (!st) return;
   const ids = lineupIds();
