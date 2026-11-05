@@ -17,6 +17,7 @@ const args = process.argv.slice(2);
 const flag = name => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : undefined; };
 const PORT = Number(flag('--port') ?? 8790);
 const OPEN = !args.includes('--no-open');
+const VERSION = '1.2.2'; // keep in step with package.json
 const APP_DIR = path.join(process.env.APPDATA || os.homedir(), 'RosterBuilder');
 
 // the saves folder you picked is remembered between launches
@@ -45,18 +46,48 @@ function findSavesDir() {
 }
 const remembered = readSettings().savesDir;
 let savesDir = flag('--saves') ?? (remembered && fs.existsSync(remembered) ? remembered : findSavesDir());
+// nothing in the usual places: search this PC once (a few seconds at most) for a saves folder that has files
+if (!flag('--saves')) { const c = savesCounts(savesDir); if (!c || !(c.rosters + c.drafts + c.franchises)) savesDir = searchSaves().find(f => f.rosters + f.drafts + f.franchises)?.path ?? savesDir; }
 
-// Windows' own folder picker (PowerShell + WinForms), kept above the app window.
-// Resolves to the folder, null when cancelled, or undefined when the picker couldn't open (the app then asks for a path).
-function pickFolder(start) {
-  const script = `Add-Type -AssemblyName System.Windows.Forms
-$owner = New-Object System.Windows.Forms.Form -Property @{ TopMost = $true }
-$d = New-Object System.Windows.Forms.FolderBrowserDialog
-$d.Description = 'Choose your Madden NFL 27 saves folder (the one with your ROSTER files)'
-if (Test-Path -LiteralPath $env:RB_START) { $d.SelectedPath = $env:RB_START }
-if ($d.ShowDialog($owner) -eq [System.Windows.Forms.DialogResult]::OK) { $d.SelectedPath }`;
-  return new Promise(resolve => execFile('powershell.exe', ['-NoProfile', '-STA', '-Command', script], { env: { ...process.env, RB_START: start }, windowsHide: true },
-    (err, stdout) => resolve(err ? undefined : String(stdout).trim() || null)));
+// The folder browser lives in the app window (a Windows dialog started from here can open hidden behind it).
+// What a folder holds: Madden files counted, so the browser can point at the right one
+function savesCounts(dir) {
+  let files = [];
+  try { files = fs.readdirSync(dir); } catch { return null; }
+  return { rosters: files.filter(f => /^ROSTER-/.test(f)).length, drafts: files.filter(f => /^CAREERDRAFT-/.test(f)).length, franchises: files.filter(f => /^CAREER-/.test(f)).length };
+}
+function listFolder(dir) {
+  if (!dir) { // top level: drives
+    const drives = process.platform === 'win32' ? 'CDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(l => `${l}:\\`).filter(d => fs.existsSync(d)) : ['/'];
+    return { dir: '', parent: null, folders: drives.map(d => ({ name: d, path: d })), counts: null };
+  }
+  const folders = [];
+  try {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) if (e.isDirectory() && !/^\$|^System Volume Information$/i.test(e.name)) folders.push({ name: e.name, path: path.join(dir, e.name) });
+  } catch (err) { throw new Error(`Can't open ${dir}: ${err.code === 'EPERM' || err.code === 'EACCES' ? 'no permission' : err.code ?? err.message}`); }
+  const parent = path.dirname(dir);
+  return { dir, parent: parent === dir ? '' : parent, folders: folders.sort((a, b) => a.name.localeCompare(b.name)), counts: savesCounts(dir) };
+}
+// every "Madden NFL 27\saves" in the usual Documents folders, then anywhere a few levels under the user folder and drive roots
+function searchSaves() {
+  const found = new Map();
+  const check = d => { const c = savesCounts(d); if (c) found.set(d.toLowerCase(), { path: d, ...c }); };
+  for (const d of documentsFolders()) check(path.join(d, 'Madden NFL 27', 'saves'));
+  const deadline = Date.now() + 4000;
+  const walk = (dir, depth) => {
+    if (depth < 0 || Date.now() > deadline) return;
+    let entries = [];
+    try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
+    for (const e of entries) {
+      if (!e.isDirectory() || /^(\$|\.|node_modules$|Windows$|Program Files|ProgramData$|AppData$)/i.test(e.name)) continue;
+      const full = path.join(dir, e.name);
+      if (/^Madden NFL 27$/i.test(e.name)) check(path.join(full, 'saves'));
+      else walk(full, depth - 1);
+    }
+  };
+  walk(os.homedir(), 4);
+  if (process.platform === 'win32') for (const l of 'CDEFGH') if (fs.existsSync(`${l}:\\`)) walk(`${l}:\\`, 2);
+  return [...found.values()].sort((a, b) => (b.rosters + b.drafts + b.franchises) - (a.rosters + a.drafts + a.franchises));
 }
 
 // from the exe's embedded assets, or the source tree when run with node
@@ -162,14 +193,17 @@ const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, 'http://localhost');
     if (req.method === 'GET' && url.pathname === '/') return send(res, 200, loadUi(), 'text/html; charset=utf-8');
     if (req.method === 'GET' && url.pathname === '/licenses') return send(res, 200, bundled('THIRD-PARTY-NOTICES.md', 'THIRD-PARTY-NOTICES.md'), 'text/plain; charset=utf-8');
-    if (req.method === 'GET' && url.pathname === '/api/rosters') return send(res, 200, JSON.stringify({ savesDir, rosters: listRosters() }));
+    if (req.method === 'GET' && url.pathname === '/api/version') return send(res, 200, JSON.stringify({ version: VERSION }));
+    if (req.method === 'GET' && url.pathname === '/api/rosters') return send(res, 200, JSON.stringify({ savesDir, exists: fs.existsSync(savesDir), counts: savesCounts(savesDir), rosters: listRosters() }));
+    if (req.method === 'GET' && url.pathname === '/api/folders') {
+      let dir = url.searchParams.get('dir') ?? '';
+      // nearest: start from the closest folder that exists (the saves path may not)
+      if (url.searchParams.has('nearest')) while (dir && !fs.existsSync(dir)) dir = path.dirname(dir) === dir ? '' : path.dirname(dir);
+      return send(res, 200, JSON.stringify(listFolder(dir)));
+    }
+    if (req.method === 'GET' && url.pathname === '/api/find-saves') return send(res, 200, JSON.stringify({ found: searchSaves() }));
     if (req.method === 'POST' && url.pathname === '/api/saves-dir') {
-      let { dir, pick } = await readBody(req);
-      if (pick) {
-        dir = await pickFolder(savesDir);
-        if (dir === undefined) return send(res, 200, JSON.stringify({ unavailable: true, savesDir }));
-        if (dir === null) return send(res, 200, JSON.stringify({ cancelled: true, savesDir }));
-      }
+      const { dir } = await readBody(req);
       if (!dir || !fs.existsSync(dir)) return send(res, 400, JSON.stringify({ error: 'That folder does not exist' }));
       savesDir = dir; cache.clear(); writeSettings({ savesDir });
       return send(res, 200, JSON.stringify({ savesDir, rosters: listRosters() }));
@@ -286,33 +320,43 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-// app-style window in Edge if available, otherwise the default browser
+// app-style window: Chrome first (it's kept up to date; some PCs have an old, locked Edge the app can't run in),
+// then Edge, otherwise the default browser
 function openWindow(url) {
-  const edge = ['C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe', 'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe'].find(p => fs.existsSync(p));
-  // own Edge profile: a separate Edge process, so the flag letting the intro play sound before the first click always applies
-  const profile = path.join(APP_DIR, 'edge-profile');
-  if (edge) execFile(edge, [`--app=${url}`, `--user-data-dir=${profile}`, '--window-size=1500,950', '--autoplay-policy=no-user-gesture-required', '--no-first-run'], () => {});
-  else execFile('cmd', ['/c', 'start', '', url], () => {});
+  const local = process.env.LOCALAPPDATA || '';
+  const browsers = [
+    ['chrome', ['C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe', path.join(local, 'Google\\Chrome\\Application\\chrome.exe')]],
+    ['edge', ['C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe', 'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe']],
+  ];
+  for (const [name, paths] of browsers) {
+    const exe = paths.find(p => fs.existsSync(p));
+    if (!exe) continue;
+    // own profile: a separate browser process, so the flag letting the intro play sound before the first click always applies
+    const profile = path.join(APP_DIR, `${name}-profile`);
+    console.log(`Opening the app window in ${name === 'chrome' ? 'Chrome' : 'Edge'}. If it looks broken, paste ${url} into any browser.`);
+    return execFile(exe, [`--app=${url}`, `--user-data-dir=${profile}`, '--window-size=1500,950', '--autoplay-policy=no-user-gesture-required', '--no-first-run', '--no-default-browser-check'], () => {});
+  }
+  execFile('cmd', ['/c', 'start', '', url], () => {});
 }
 
 let port = PORT;
 server.on('error', async e => {
   if (e.code !== 'EADDRINUSE') { console.error(e.message); process.exit(1); }
-  // opened twice: the first copy is still running, so just show its window
+  // opened twice: if that copy is this same version, just show its window. An older copy keeps its port and this one moves on.
   try {
-    const r = await fetch(`http://127.0.0.1:${port}/api/rosters`);
-    if (r.ok && Array.isArray((await r.json()).rosters)) {
+    const r = await fetch(`http://127.0.0.1:${port}/api/version`);
+    if (r.ok && (await r.json()).version === VERSION) {
       console.log('Roster Builder is already running.');
       if (OPEN) openWindow(`http://127.0.0.1:${port}/`);
       return setTimeout(() => process.exit(0), 1500);
     }
-  } catch { /* something else has the port */ }
+  } catch { /* an older copy or another program has the port */ }
   if (port >= PORT + 10) { console.error(`Ports ${PORT} to ${port} are all in use.`); process.exit(1); }
   server.listen(++port, '127.0.0.1');
 });
 server.on('listening', () => {
   const url = `http://127.0.0.1:${port}/`;
-  console.log(`Madden 27 Roster Builder running at ${url}`);
+  console.log(`Madden 27 Roster Builder ${VERSION} running at ${url}`);
   console.log(`Saves folder: ${savesDir}`);
   console.log('Close this window to quit.');
   if (OPEN) openWindow(url);
