@@ -139,6 +139,12 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
 .npres:hover { border-color: var(--blue); transform: translateX(2px); }
 .npres img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: #0006; }
 .npres small { color: var(--muted); }
+.fblist { display: grid; gap: 4px; }
+.fbrow { padding: 7px 10px; border-radius: 6px; background: var(--panel2); border: 1px solid var(--line); cursor: pointer; transition: border-color .15s; }
+.fbrow:hover { border-color: var(--blue); }
+.fbrow.found { display: grid; grid-template-columns: 1fr auto; align-items: center; word-break: break-all; }
+.fbrow.found .btn { grid-row: 1 / 3; grid-column: 2; }
+.fbrow small { color: var(--muted); }
 .clogo { width: 26px; height: 26px; object-fit: contain; flex: none; }
 /* franchise (beta) */
 .beta { font-size: 10px; font-weight: 800; letter-spacing: 1px; color: #111; background: var(--superstar); padding: 1px 6px; border-radius: 4px; }
@@ -567,6 +573,20 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
   </div>
 </div>
 
+<div class="modal" id="folderBrowser" style="width:min(680px,94vw)">
+  <header><h2>Choose your Madden saves folder</h2><div class="spacer"></div><button class="btn" data-close>Close</button></header>
+  <div class="list" style="padding:16px">
+    <div id="fbNote" style="color:var(--superstar);margin-bottom:6px"></div>
+    <h4 class="np-h" style="margin-top:0">Found on this PC</h4>
+    <div id="fbFound" class="fblist"></div>
+    <h4 class="np-h">Or browse to it</h4>
+    <div style="display:flex;gap:8px;align-items:center"><button class="btn" id="fbUp">⬆ Up</button><b id="fbPath" style="flex:1;word-break:break-all"></b><button class="btn green" id="fbUse">Use this folder</button></div>
+    <div id="fbCounts" style="color:var(--muted);font-size:12px;margin:6px 0"></div>
+    <div id="fbList" class="fblist" style="max-height:260px;overflow:auto"></div>
+    <div style="display:flex;gap:8px;margin-top:10px"><input class="input" id="fbType" placeholder="Or paste a folder path" style="flex:1"><button class="btn" id="fbGo">Go</button></div>
+  </div>
+</div>
+
 <div class="modal" id="credits" style="width:min(480px,94vw)">
   <header><h2>Credits</h2><div class="spacer"></div><button class="btn" data-close>Close</button></header>
   <div class="list credits-list" style="padding:18px 22px">
@@ -586,6 +606,27 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
 </aside>
 
 <div class="toast" id="toast"></div>
+
+<!-- separate and old-fashioned on purpose: it still runs when the main script can't (an outdated browser), and shows why -->
+<div id="crash" style="display:none;position:fixed;left:0;right:0;top:0;z-index:100;background:#5a1820;border-bottom:2px solid #e0454f;color:#fff;padding:12px 18px;font:14px 'Segoe UI',sans-serif"></div>
+<script>
+(function () {
+  var shown = false;
+  function report(msg) {
+    if (shown) return; shown = true;
+    var el = document.getElementById('crash');
+    el.innerHTML = '<b>Something went wrong in this window.</b> ' + String(msg).replace(/</g, '&lt;') +
+      '<br>Try opening <b>' + location.href + '</b> in Chrome or another up-to-date browser. If it keeps happening, please report this message.';
+    el.style.display = 'block';
+    var sp = document.getElementById('splash'); if (sp) sp.style.display = 'none';
+    var it = document.getElementById('intro'); if (it) it.style.display = 'none';
+  }
+  window.addEventListener('error', function (e) { report(e.message || 'unknown error'); });
+  // the app needs a browser from 2023 or later
+  try { new Function('let a = {}; a.b ??= 1; return a?.b;'); if (!(window.CSS && CSS.supports('color', 'color-mix(in srgb, red, blue)'))) throw 0; }
+  catch (e) { report('This browser is too old for the app.'); }
+})();
+</script>
 
 <script>
 const POS = ['QB','HB','FB','WR','TE','LT','LG','C','RG','RT','LE','RE','DT','LOLB','MLB','ROLB','CB','FS','SS','K','P'];
@@ -752,8 +793,8 @@ async function boot() {
   const started = Date.now();
   try {
     splash(15, 'Finding your Madden rosters…');
-    const { rosters, savesDir } = await api('/api/rosters');
-    savesInfo.dir = savesDir;
+    const { rosters, savesDir, exists } = await api('/api/rosters');
+    Object.assign(savesInfo, { dir: savesDir, exists });
     $('#rosterSel').innerHTML = rosters.map(r => `<option>${esc(r.name)}</option>`).join('');
     if (!rosters.length) {
       splash(100, 'No rosters found');
@@ -836,7 +877,8 @@ function renderConferences() {
   if (!roster) {
     $('#confRow').innerHTML = `<div class="empty-state" style="grid-column:1/-1">
       ${savesInfo.error ? `Couldn't read <b>${esc($('#rosterSel').value)}</b>: ${esc(savesInfo.error)}<br>Pick another roster at the top right.`
-        : `No Madden roster files found in<br><b>${esc(savesInfo.dir)}</b><br><br>Save a roster in Madden NFL 27 and it shows up here, or choose the folder where your Madden saves are.`}
+        : savesInfo.exists ? `No Madden roster files in<br><b>${esc(savesInfo.dir)}</b><br><br>Save a roster in Madden NFL 27 (it makes a ROSTER- file here), or choose a different saves folder.`
+        : `There's no folder at<br><b>${esc(savesInfo.dir)}</b><br><br>Click below: the app searches this PC for your Madden NFL 27 saves.`}
       <div style="margin-top:18px"><button class="btn blue" data-pickfolder>Choose saves folder</button></div>
       <div style="margin-top:14px;font-size:12px">Draft classes and Franchise (top right) work without a roster.</div></div>`;
     return;
@@ -996,7 +1038,7 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('dblclick', e => { const tl = e.target.closest('[data-tile]'); if (tl) openBuilder(Number(tl.dataset.tile)); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
-function closeAll() { for (const s of ['#shade', '#picker', '#exporter', '#syncer', '#credits', '#league', '#drawer', '#pdrawer', '#draftExporter', '#newProspect', '#frExporter']) $(s).classList.remove('on'); picking = editing = null; }
+function closeAll() { for (const s of ['#shade', '#picker', '#exporter', '#syncer', '#credits', '#league', '#drawer', '#pdrawer', '#draftExporter', '#newProspect', '#frExporter', '#folderBrowser']) $(s).classList.remove('on'); picking = editing = null; }
 const openModal = id => { $('#shade').classList.add('on'); $(id).classList.add('on'); };
 
 // ---- player picker ----
@@ -1302,18 +1344,41 @@ $('#resetAllBtn').onclick = () => {
   st = freshState(st.base, st.teamId); render();
   toast(`All teams reset (${gone.length} edited team${gone.length === 1 ? '' : 's'} cleared)`);
 };
-// Windows' folder picker; if it can't open, type the path instead. The choice is remembered.
-async function pickSavesFolder() {
+// ---- saves folder: a folder browser in the app, plus a search of this PC for Madden saves. The choice is remembered. ----
+const countsText = c => c ? `${c.rosters} roster${c.rosters === 1 ? '' : 's'} · ${c.drafts} draft class${c.drafts === 1 ? '' : 'es'} · ${c.franchises} franchise save${c.franchises === 1 ? '' : 's'}` : '';
+let browsing = '';
+async function browseFolder(dir, nearest) {
   try {
-    let r = await api('/api/saves-dir', { pick: true });
-    if (r.unavailable) {
-      const dir = prompt('Folder where Madden keeps its saves (ROSTER files):', r.savesDir);
-      if (!dir) return;
-      r = await api('/api/saves-dir', { dir });
-    }
-    if (!r.cancelled) location.reload();
+    const r = await api('/api/folders?dir=' + encodeURIComponent(dir) + (nearest ? '&nearest=1' : ''));
+    browsing = r.dir;
+    $('#fbPath').textContent = r.dir || 'This PC';
+    $('#fbUp').disabled = r.parent === null;
+    $('#fbUp').dataset.dir = r.parent ?? '';
+    $('#fbUse').disabled = !r.dir;
+    $('#fbCounts').textContent = r.counts ? `This folder: ${countsText(r.counts)}` : '';
+    $('#fbList').innerHTML = r.folders.map(f => `<div class="fbrow" data-fbdir="${esc(f.path)}">📁 ${esc(f.name)}</div>`).join('') || '<div class="empty-state" style="padding:16px">No folders in here.</div>';
   } catch (e) { toast(e.message, true); }
 }
+async function pickSavesFolder(note) {
+  $("#fbNote").textContent = typeof note === "string" ? note : "";
+  openModal('#folderBrowser');
+  const { savesDir } = await api('/api/rosters');
+  browseFolder(savesDir, true); // the deepest part of the current saves path that exists
+  $('#fbFound').innerHTML = '<div style="color:var(--muted);font-size:12px">Searching this PC for Madden NFL 27 saves…</div>';
+  try {
+    const { found } = await api('/api/find-saves');
+    $('#fbFound').innerHTML = found.length ? found.map(f => `<div class="fbrow found" data-fbuse="${esc(f.path)}"><b>${esc(f.path)}</b><br><small>${countsText(f)}</small><span class="btn green">Use</span></div>`).join('')
+      : '<div style="color:var(--muted);font-size:12px">No "Madden NFL 27\\saves" folder found on this PC. Has Madden saved anything yet? Browse to it below if it\'s somewhere unusual.</div>';
+  } catch (e) { $('#fbFound').textContent = e.message; }
+}
+async function useSavesFolder(dir) {
+  try { await api('/api/saves-dir', { dir }); location.reload(); } catch (e) { toast(e.message, true); }
+}
+$('#fbList').addEventListener('click', e => { const r = e.target.closest('[data-fbdir]'); if (r) browseFolder(r.dataset.fbdir); });
+$('#fbFound').addEventListener('click', e => { const r = e.target.closest('[data-fbuse]'); if (r) useSavesFolder(r.dataset.fbuse); });
+$('#fbUp').onclick = () => browseFolder($('#fbUp').dataset.dir);
+$('#fbUse').onclick = () => useSavesFolder(browsing);
+$('#fbGo').onclick = () => { const v = $('#fbType').value.trim(); if (v) browseFolder(v); };
 $('#folderBtn').onclick = pickSavesFolder;
 document.addEventListener('click', e => { if (e.target.closest('[data-pickfolder]')) pickSavesFolder(); });
 $('#exportBtn').onclick = () => {
@@ -1447,7 +1512,7 @@ async function loadColleges() { if (!Object.keys(COLLEGES).length) try { COLLEGE
 async function openDrafts() {
   await loadColleges();
   const { drafts, savesDir } = await api('/api/drafts');
-  if (!drafts.length) return toast(`No CAREERDRAFT files in ${savesDir}`, true);
+  if (!drafts.length) return pickSavesFolder(`No draft classes (CAREERDRAFT- files) in ${savesDir}. Pick the Madden saves folder that has them.`);
   $('#draftSel').innerHTML = drafts.map(d => `<option>${esc(d.name)}</option>`).join('');
   const last = store.get('rb:lastDraft'); if (last && drafts.some(d => d.name === last)) $('#draftSel').value = last;
   $('#draftPos').innerHTML = '<option value="">All positions</option>' + POS.map((p, i) => `<option value="${i}">${p}</option>`).join('');
@@ -1687,7 +1752,7 @@ function setCoach(c, patch) {
 
 async function openFranchise() {
   const { franchises, savesDir } = await api('/api/franchises');
-  if (!franchises.length) return toast(`No CAREER franchise saves in ${savesDir}`, true);
+  if (!franchises.length) return pickSavesFolder(`No franchise saves (CAREER- files) in ${savesDir}. Pick the Madden saves folder that has them.`);
   $('#frSel').innerHTML = franchises.map(f => `<option>${esc(f.name)}</option>`).join('');
   const last = store.get('rb:lastFranchise'); if (last && franchises.some(f => f.name === last)) $('#frSel').value = last;
   showScreen('#franchiseScreen');

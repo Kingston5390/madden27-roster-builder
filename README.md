@@ -77,9 +77,9 @@ A free desktop app for editing **Madden NFL 27** rosters, draft classes and fran
 ## Download and run
 
 1. [Download `RosterBuilder.exe`](https://github.com/Kingston5390/madden27-roster-builder/releases/latest/download/RosterBuilder.exe) (always the latest version, also on the [Releases](../../releases) page).
-2. Double-click it. It finds your saves folder (`Documents\Madden NFL 27\saves`, including when OneDrive moved Documents) and opens in its own window. A small console window stays open; close it to quit.
+2. Double-click it. It finds your saves folder (`Documents\Madden NFL 27\saves`, including when OneDrive moved Documents) and opens in its own window (Chrome if you have it, otherwise Edge; you can also paste the address shown in the console into any browser). A small console window stays open; close it to quit.
 
-If it says no roster files were found, save a roster in Madden first, or click **Choose saves folder** and pick the folder with your `ROSTER-` files. The app remembers it.
+If it says no roster files were found, save a roster in Madden first, or click **Choose saves folder**: it lists every Madden saves folder it finds on your PC, or browse to yours. The app remembers it.
 
 Player photos, team logos and NFL sync need an internet connection. Building, editing and exporting work offline.
 
@@ -88,9 +88,9 @@ The All-time team button and legend search read legends from any roster in your 
 
 ## Security & verification
 
-**Scan result (v1.2.1):** Microsoft Defender Antivirus, engine 1.1.26100.4, signatures 1.463.121.0, custom scan of `RosterBuilder.exe`: **no threats found**.
+**Scan result (v1.2.2):** Microsoft Defender Antivirus, engine 1.1.26100.4, signatures 1.463.121.0, custom scan of `RosterBuilder.exe`: **no threats found**.
 
-**SHA-256 (v1.2.1):** `c64db177032adf623ff5470dad2d25b008773f1e9c92abf47065e7d75a4e299d`
+**SHA-256 (v1.2.2):** `3f5cd5105d4fc442ca2fefb41e8908e554fce3f3c7c0f9b49ab536be21add0fd`
 
 Each release lists its own scan result and checksum.
 
