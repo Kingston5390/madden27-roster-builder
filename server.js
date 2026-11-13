@@ -6,7 +6,7 @@ const path = require('node:path');
 const os = require('node:os');
 const { execFile, execFileSync } = require('node:child_process');
 const { summarize, summarizeLegends, exportRoster } = require('./lib/roster');
-const { leagueChaos } = require('./lib/league');
+const { leagueChaos, applyTrades } = require('./lib/league');
 const { playerPhotos, prospectPhotos, prefetchAll, cachedPhotos } = require('./lib/photos');
 const { readDraftClass, writeDraftClass } = require('./lib/draft');
 const { summarizeFranchise, applyFranchiseEdits } = require('./lib/franchise');
@@ -17,7 +17,7 @@ const args = process.argv.slice(2);
 const flag = name => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : undefined; };
 const PORT = Number(flag('--port') ?? 8790);
 const OPEN = !args.includes('--no-open');
-const VERSION = '1.2.2'; // keep in step with package.json
+const VERSION = '1.2.3'; // keep in step with package.json
 const APP_DIR = path.join(process.env.APPDATA || os.homedir(), 'RosterBuilder');
 
 // the saves folder you picked is remembered between launches
@@ -188,12 +188,21 @@ async function franchiseInfo(file) {
 const send = (res, code, body, type = 'application/json') => { res.writeHead(code, { 'content-type': type, 'cache-control': 'no-store' }); res.end(body); };
 const readBody = req => new Promise((ok, fail) => { let s = ''; req.on('data', c => { s += c; if (s.length > 20e6) req.destroy(); }); req.on('end', () => { try { ok(JSON.parse(s || '{}')); } catch (e) { fail(e); } }); });
 
+let latestRelease = null;
 const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url, 'http://localhost');
     if (req.method === 'GET' && url.pathname === '/') return send(res, 200, loadUi(), 'text/html; charset=utf-8');
     if (req.method === 'GET' && url.pathname === '/licenses') return send(res, 200, bundled('THIRD-PARTY-NOTICES.md', 'THIRD-PARTY-NOTICES.md'), 'text/plain; charset=utf-8');
     if (req.method === 'GET' && url.pathname === '/api/version') return send(res, 200, JSON.stringify({ version: VERSION }));
+    // newest release on GitHub, so the app can say when a new version is out (asked once per launch)
+    if (req.method === 'GET' && url.pathname === '/api/latest') {
+      latestRelease ??= fetch('https://api.github.com/repos/Kingston5390/madden27-roster-builder/releases/latest', { headers: { 'user-agent': 'MaddenRosterBuilder' } })
+        .then(r => r.json()).then(j => ({ version: String(j.tag_name ?? '').replace(/^v/, ''), url: j.html_url })).catch(() => ({}));
+      const latest = await latestRelease;
+      const newer = (a, b) => { const x = a.split('.').map(Number), y = b.split('.').map(Number); for (let i = 0; i < 3; i++) if ((x[i] || 0) !== (y[i] || 0)) return (x[i] || 0) > (y[i] || 0); return false; };
+      return send(res, 200, JSON.stringify({ current: VERSION, latest: latest.version ?? null, url: latest.url ?? null, update: !!latest.version && newer(latest.version, VERSION) }));
+    }
     if (req.method === 'GET' && url.pathname === '/api/rosters') return send(res, 200, JSON.stringify({ savesDir, exists: fs.existsSync(savesDir), counts: savesCounts(savesDir), rosters: listRosters() }));
     if (req.method === 'GET' && url.pathname === '/api/folders') {
       let dir = url.searchParams.get('dir') ?? '';
@@ -219,8 +228,10 @@ const server = http.createServer(async (req, res) => {
       const results = [];
       for (const f of files ?? []) {
         const name = path.basename(f);
-        const stem = name.replace(/^ROSTER-/i, '').replace(/[^A-Za-z0-9]/g, '').replace(/SYNC\d{4}$/, '').slice(0, 16);
-        const out = rosterPath(`${stem}SYNC${stamp}`);
+        const stem = name.replace(/^ROSTER-/i, '').replace(/[^A-Za-z0-9]/g, '').replace(/SYNC\d{4}[A-Z]?$/, '').slice(0, 16);
+        // synced twice in a day: ...SYNC1113B, C, ... instead of failing on the existing file
+        let out = rosterPath(`${stem}SYNC${stamp}`);
+        for (let n = 1; fs.existsSync(out) && n < 26; n++) out = rosterPath(`${stem}SYNC${stamp}${String.fromCharCode(65 + n)}`);
         try {
           const n = syncRoster(path.join(savesDir, name), out, nfl, { releaseMissing });
           results.push({ base: name, file: path.basename(out), moved: n.moved, released: n.released, injured: n.injured.length, injuries: n.injured });
@@ -307,6 +318,12 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'POST' && url.pathname === '/api/player-photos') {
       const { names } = await readBody(req);
       return send(res, 200, JSON.stringify(await playerPhotos((names ?? []).map(String).slice(0, 60))));
+    }
+    if (req.method === 'POST' && url.pathname === '/api/trades') {
+      const body = await readBody(req);
+      const out = rosterPath(body.outName);
+      const result = applyTrades(path.join(savesDir, path.basename(body.base)), out, body.moves);
+      return send(res, 200, JSON.stringify({ ...result, file: path.basename(out) }));
     }
     if (req.method === 'POST' && url.pathname === '/api/league') {
       const body = await readBody(req);

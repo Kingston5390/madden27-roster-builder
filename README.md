@@ -32,6 +32,7 @@ A free desktop app for editing **Madden NFL 27** rosters, draft classes and fran
 **Build a lineup**
 - AFC / NFC and Madden-style team select with team ratings, top players, NFL rankings and development-trait counts.
 - Lineup board for offense, defense and special teams with depth slots (LT1, LT2, WR1…WR5 and so on). The team's real depth chart loads first.
+- **Full depth chart** for every position: add players without replacing anyone, reorder, remove, or add the best available.
 - Click **+** on any slot to search all ~3,100 players by name, position or team, or take the **best available** player at that position.
 - All 32 team logos across the top to jump between teams.
 
@@ -40,7 +41,8 @@ A free desktop app for editing **Madden NFL 27** rosters, draft classes and fran
 - Anyone with no photo anywhere, or whose photo won't load (for example offline), gets a silhouette in his team's colors with his jersey number. Your own uploads always come first.
 
 **Edit players**
-- Every rating (0–99), overall, height (up to 10'7", body size included), weight, age, jersey number, name, and development trait (Normal, Star, Superstar, X-Factor).
+- Every rating (0–99), overall, height (up to 10'7", body size included), weight, age, jersey number, name, and development trait (Normal, Star, Superstar, X-Factor). Every rating has a slider and a number box.
+- **Spreadsheets**: save a team (or a draft class) as a CSV, edit it in Excel or Google Sheets, and import it back.
 - Max all to 99, swap for the best player at a position, replace or remove.
 - **Upload your own photo** for any player (PNG, JPG or WebP), great for custom players. Photos are saved on your PC and show on cards, in search and in the editor. They appear in this app only: Madden's in-game faces are 3D head models a roster file can't replace.
 
@@ -49,8 +51,13 @@ A free desktop app for editing **Madden NFL 27** rosters, draft classes and fran
 - Fun: **All-time [team]** (that franchise's legends), Kickers everywhere, Tiny team (5'0"), Giant team (10'0"), Speed demons, Chaos team.
 - League chaos: **Randomize NFL teams** (every player dealt to a random team) and **Randomize positions**.
 
+**Trades** (Madden style)
+- Pick any two teams, add players to each side, and watch the trade interest meter. CPU teams judge value (overall, age, position, dev trait) and their team needs, and can decline. **Force accept** pushes any trade through.
+- **Get offers**: put players on the block and CPU teams make real offers from their rosters.
+- Accepted trades are saved to a new roster file when you're ready.
+
 **Keep it real**
-- **Sync with NFL** pulls every team's current roster and the latest injury report, then writes an updated copy of your roster: trades, signings and injuries (weeks out from the estimated return date). Practice-squad players are skipped and no team goes over 75.
+- **Sync with NFL** pulls every team's current roster and the latest injury report, then writes an updated copy of your roster: trades, signings and injuries (weeks out from the estimated return date). Practice-squad players are skipped and no team goes over 75. It never changes the roster you're on: you choose whether to open the synced copy.
 
 **Export**
 - Writes a **new** roster file to your Madden saves folder. It never overwrites a roster. Load it in Madden from your saved rosters.
@@ -67,10 +74,12 @@ A free desktop app for editing **Madden NFL 27** rosters, draft classes and fran
 - Opens any franchise save on the team you coach, with all 32 teams one click away.
 - **Development traits** that stick in Franchise: Normal, Star, Superstar or X-Factor for any player, or the whole team at once.
 - **Ability ranks**: Bronze, Silver, Gold or Platinum for each ability a player has.
+- **Contracts**: years left and salary per year for any player.
 - **Coaches**: raise your head coach and coordinators to level 49 and unlock every talent tier. Vacant jobs are shown as vacant.
 - Saves a new `CAREER-` file, then reads it back to check every change. Load it in Madden from Franchise → Load.
 
 **Look and sound**
+- Tells you when a new version is out, with a download button.
 - A different intro every launch (five originals), and your own `.mp4` or `.webm` clips join the rotation: drop them in `%APPDATA%\RosterBuilder\intros` (Credits → Open intros folder).
 - Sound effects with a mute button, animations and a loading screen.
 
@@ -88,9 +97,9 @@ The All-time team button and legend search read legends from any roster in your 
 
 ## Security & verification
 
-**Scan result (v1.2.2):** Microsoft Defender Antivirus, engine 1.1.26100.4, signatures 1.463.121.0, custom scan of `RosterBuilder.exe`: **no threats found**.
+**Scan result (v1.2.3):** Microsoft Defender Antivirus, engine 1.1.26100.4, signatures 1.463.121.0, custom scan of `RosterBuilder.exe`: **no threats found**.
 
-**SHA-256 (v1.2.2):** `3f5cd5105d4fc442ca2fefb41e8908e554fce3f3c7c0f9b49ab536be21add0fd`
+**SHA-256 (v1.2.3):** `7afa005de753064cfd43236f09d8d7c27e43f973a7f8d6cf3d265c703ad2de7e`
 
 Each release lists its own scan result and checksum.
 
