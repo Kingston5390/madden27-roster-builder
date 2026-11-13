@@ -34,7 +34,7 @@ A free desktop app for editing **Madden NFL 27** rosters, draft classes and fran
 - Lineup board for offense, defense and special teams with depth slots (LT1, LT2, WR1…WR5 and so on). The team's real depth chart loads first.
 - **Full depth chart** for every position: add players without replacing anyone, reorder, remove, or add the best available.
 - Click **+** on any slot to search all ~3,100 players by name, position or team, or take the **best available** player at that position.
-- All 32 team logos across the top to jump between teams.
+- All 32 team logos across the top to jump between teams, and a Roster picker to switch roster files without leaving the team.
 
 **A headshot for every player**
 - Current players use their ESPN headshot. Anyone ESPN's rosters don't cover (legends, free agents, renamed players, franchise rookies) is looked up once by name on ESPN, then Wikipedia.
@@ -86,7 +86,7 @@ A free desktop app for editing **Madden NFL 27** rosters, draft classes and fran
 ## Download and run
 
 1. [Download `RosterBuilder.exe`](https://github.com/Kingston5390/madden27-roster-builder/releases/latest/download/RosterBuilder.exe) (always the latest version, also on the [Releases](../../releases) page).
-2. Double-click it. It finds your saves folder (`Documents\Madden NFL 27\saves`, including when OneDrive moved Documents) and opens in its own window (Chrome if you have it, otherwise Edge; you can also paste the address shown in the console into any browser). A small console window stays open; close it to quit.
+2. Double-click it. It finds your saves folder (`Documents\Madden NFL 27\saves`, including when OneDrive moved Documents) and opens in its own window (Chrome if you have it, otherwise Edge; you can also paste the address shown in the console into any browser). Close the app window to quit. There's no console window; if something goes wrong, the details are in `%APPDATA%RosterBuilderlog.txt`.
 
 If it says no roster files were found, save a roster in Madden first, or click **Choose saves folder**: it lists every Madden saves folder it finds on your PC, or browse to yours. The app remembers it.
 
@@ -97,9 +97,9 @@ The All-time team button and legend search read legends from any roster in your 
 
 ## Security & verification
 
-**Scan result (v1.2.3):** Microsoft Defender Antivirus, engine 1.1.26100.4, signatures 1.463.121.0, custom scan of `RosterBuilder.exe`: **no threats found**.
+**Scan result (v1.2.4):** Microsoft Defender Antivirus, engine 1.1.26100.4, signatures 1.463.121.0, custom scan of `RosterBuilder.exe`: **no threats found**.
 
-**SHA-256 (v1.2.3):** `7afa005de753064cfd43236f09d8d7c27e43f973a7f8d6cf3d265c703ad2de7e`
+**SHA-256 (v1.2.4):** `bcfd0b93cf6e61d1f60db0b82eb2a9d24c262dd8da69a57c4ef1e352a85a0c22`
 
 Each release lists its own scan result and checksum.
 

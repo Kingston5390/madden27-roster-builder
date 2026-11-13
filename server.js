@@ -17,8 +17,32 @@ const args = process.argv.slice(2);
 const flag = name => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : undefined; };
 const PORT = Number(flag('--port') ?? 8790);
 const OPEN = !args.includes('--no-open');
-const VERSION = '1.2.3'; // keep in step with package.json
+const VERSION = '1.2.4'; // keep in step with package.json
 const APP_DIR = path.join(process.env.APPDATA || os.homedir(), 'RosterBuilder');
+
+// The exe has no console window, so what it would print also goes to a log file (newest run at the bottom)
+const IS_EXE = (() => { try { return require('node:sea').isSea(); } catch { return false; } })();
+if (IS_EXE) {
+  const LOG = path.join(APP_DIR, 'log.txt');
+  try { fs.mkdirSync(APP_DIR, { recursive: true }); if (fs.statSync(LOG, { throwIfNoEntry: false })?.size > 1e6) fs.rmSync(LOG); } catch {}
+  const toLog = (...a) => { try { fs.appendFileSync(LOG, `[${new Date().toISOString()}] ${a.join(' ')}\n`); } catch {} };
+  const out = console.log, err = console.error;
+  console.log = (...a) => { toLog(...a); out(...a); };
+  console.error = (...a) => { toLog('ERROR', ...a); err(...a); };
+  process.on('uncaughtException', e => { console.error(e.stack || e.message); process.exit(1); });
+}
+
+// Close the window, close the app: the page checks in every 10 seconds, and says goodbye when it closes. With no window
+// left (no check-in for 75 seconds, which allows for browsers slowing down minimized windows, or 10 seconds after
+// a goodbye with nothing since), the app quits.
+let lastPing = 0, byeAt = 0;
+function watchWindows() {
+  setInterval(() => {
+    const now = Date.now();
+    if (!lastPing) return; // no window has opened yet
+    if (now - lastPing > 75000 || (byeAt > lastPing && now - byeAt > 10000)) { console.log('App window closed; quitting.'); process.exit(0); }
+  }, 5000).unref();
+}
 
 // the saves folder you picked is remembered between launches
 const SETTINGS = path.join(APP_DIR, 'settings.json');
@@ -195,6 +219,8 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'GET' && url.pathname === '/') return send(res, 200, loadUi(), 'text/html; charset=utf-8');
     if (req.method === 'GET' && url.pathname === '/licenses') return send(res, 200, bundled('THIRD-PARTY-NOTICES.md', 'THIRD-PARTY-NOTICES.md'), 'text/plain; charset=utf-8');
     if (req.method === 'GET' && url.pathname === '/api/version') return send(res, 200, JSON.stringify({ version: VERSION }));
+    if (url.pathname === '/api/ping') { lastPing = Date.now(); return send(res, 200, '{}'); }
+    if (url.pathname === '/api/bye') { byeAt = Date.now(); return send(res, 200, '{}'); }
     // newest release on GitHub, so the app can say when a new version is out (asked once per launch)
     if (req.method === 'GET' && url.pathname === '/api/latest') {
       latestRelease ??= fetch('https://api.github.com/repos/Kingston5390/madden27-roster-builder/releases/latest', { headers: { 'user-agent': 'MaddenRosterBuilder' } })
@@ -353,7 +379,7 @@ function openWindow(url) {
     console.log(`Opening the app window in ${name === 'chrome' ? 'Chrome' : 'Edge'}. If it looks broken, paste ${url} into any browser.`);
     return execFile(exe, [`--app=${url}`, `--user-data-dir=${profile}`, '--window-size=1500,950', '--autoplay-policy=no-user-gesture-required', '--no-first-run', '--no-default-browser-check'], () => {});
   }
-  execFile('cmd', ['/c', 'start', '', url], () => {});
+  execFile('cmd', ['/c', 'start', '', url], { windowsHide: true }, () => {});
 }
 
 let port = PORT;
@@ -375,7 +401,7 @@ server.on('listening', () => {
   const url = `http://127.0.0.1:${port}/`;
   console.log(`Madden 27 Roster Builder ${VERSION} running at ${url}`);
   console.log(`Saves folder: ${savesDir}`);
-  console.log('Close this window to quit.');
-  if (OPEN) openWindow(url);
+  console.log('Closing the app window quits.');
+  if (OPEN) { openWindow(url); watchWindows(); }
 });
 server.listen(port, '127.0.0.1');

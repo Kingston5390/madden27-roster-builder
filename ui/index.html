@@ -60,7 +60,7 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
 .btn.blue { background: var(--blue); border-color: var(--blue); font-weight: 600; color: #fff; }
 .btn.red { color: #ff9aa0; }
 .btn.warn { background: #5a1820; border-color: var(--red); }
-.logo-img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 3px 6px #0008); }
+.logo-img { width: 100%; height: 100%; object-fit: contain; }
 .logo-txt { width: 100%; height: 100%; display: grid; place-items: center; font-family: var(--cond); font-size: 18px; border-radius: 50%; }
 
 /* conference select */
@@ -115,8 +115,8 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
 #intro .bar { position: absolute; top: 0; bottom: 0; width: 60vw; animation: sweep .7s ease-in forwards; }
 #intro .coin3 { width: 170px; height: 170px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #fff6c8, #e2b13c 45%, #9a6a12); box-shadow: 0 0 50px #ffd66a77; display: grid; place-items: center; font-family: var(--cond); font-size: 70px; color: #7a520a; animation: coin 1.5s cubic-bezier(.2, .7, .3, 1) forwards; }
 #intro .digits { font-family: var(--cond); font-size: clamp(90px, 16vw, 220px); color: #ffcf3a; text-shadow: 0 0 30px #ffb10088; letter-spacing: 8px; background: #111; border: 4px solid #333; border-radius: 14px; padding: 0 30px; }
-.card.xf::before, .frrow.xf::before { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(115deg, transparent 35%, #ffffff3a 48%, transparent 60%); background-size: 260% 100%; animation: shine 3.2s ease-in-out infinite; }
-@keyframes shine { from { background-position: 130% 0; } to { background-position: -130% 0; } }
+.card.xf::before, .frrow.xf::before { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 45%; z-index: 1; pointer-events: none; background: linear-gradient(105deg, transparent, #ffffff3a, transparent); transform: translateX(-120%); animation: shine 3.2s ease-in-out infinite; will-change: transform; }
+@keyframes shine { from { transform: translateX(-120%); } to { transform: translateX(260%); } }
 .stat .ring { animation: pop .5s both; }
 /* draft board */
 .draft-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; flex-wrap: wrap; padding: 8px 0 14px; border-bottom: 1px solid var(--line); }
@@ -204,15 +204,16 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
 .ts-grid .dlabel { grid-column: 1 / -1; color: var(--muted); font-family: var(--cond); letter-spacing: 2px; font-size: 12px; margin-top: 6px; }
 .tile { aspect-ratio: 1; border-radius: 12px; background: radial-gradient(circle at 50% 42%, #44557f 0%, #26324f 55%, #161e33 100%); border: 2px solid #ffffff14; padding: 11px; cursor: pointer; transition: transform .15s, border-color .15s, background .2s; }
 .tile:hover { transform: scale(1.06); border-color: #ffffff55; }
-.tile.on { border-color: #fff; background: radial-gradient(circle at 50% 42%, #5a6fa3 0%, #2f3e64 60%, #1b2440 100%); animation: glow 2s ease-in-out infinite; }
+.tile.on { border-color: #fff; background: radial-gradient(circle at 50% 42%, #5a6fa3 0%, #2f3e64 60%, #1b2440 100%); box-shadow: 0 0 0 2px var(--blue), 0 0 22px #2f8bff88; }
 /* soft light behind logos so dark ones (Giants, Rams, Jets) stay visible */
-.tile .logo-img, .logos .logo-img, .conf .logo-img { filter: drop-shadow(0 0 1px #ffffffcc) drop-shadow(0 0 5px #ffffff55); }
+/* soft light behind logos (a background, not a filter on each image) so dark ones stay visible */
+.logos .lg, .conf .div .ls span, .hlogo, .banner .blogo, .fr-head .flogo, .tr-team .tl div, .tr-offer .tlogo { background: radial-gradient(circle, #ffffff4d 0%, #ffffff1f 42%, transparent 70%); border-radius: 50%; }
 .panel { background: linear-gradient(180deg, #ffffff0d, #ffffff05); border: 1px solid #ffffff14; border-radius: 14px; overflow: hidden; }
 .banner { display: flex; align-items: center; gap: 22px; padding: 18px 24px; position: relative; overflow: hidden;
   background: linear-gradient(100deg, color-mix(in srgb, var(--team) 92%, #fff 8%) 0%, color-mix(in srgb, var(--team) 60%, #050912) 52%, #070b16 100%); }
 .banner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, #ffffff14, transparent 45%, #0000004d); pointer-events: none; }
 .banner > * { position: relative; z-index: 1; }
-.banner .blogo { width: 120px; height: 120px; flex: none; filter: drop-shadow(0 6px 14px #000a); }
+.banner .blogo { width: 120px; height: 120px; flex: none; }
 .banner .city { font-family: var(--cond); letter-spacing: 3px; font-size: 14px; text-transform: uppercase; color: #ffffffd9; text-shadow: 0 2px 6px #000c; }
 .banner .tname { font-family: var(--cond); font-size: 64px; line-height: .95; text-transform: uppercase; color: #fff; text-shadow: 0 3px 12px #000d, 0 1px 0 #0008; }
 .banner .boxes { margin-left: auto; display: flex; gap: 8px; }
@@ -239,12 +240,12 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
 .ts-actions .btn { padding: 10px 22px; font-family: var(--cond); letter-spacing: 1px; font-size: 16px; }
 
 /* builder */
-.top { display: flex; align-items: center; gap: 12px; padding: 10px 24px; background: #04070dcc; backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); flex-wrap: wrap; position: sticky; top: 0; z-index: 4; }
+.top { display: flex; align-items: center; gap: 12px; padding: 10px 24px; background: #04070df2; border-bottom: 1px solid var(--line); flex-wrap: wrap; position: sticky; top: 0; z-index: 4; }
 .brand { font-family: var(--cond); font-size: 22px; letter-spacing: .5px; font-style: italic; }
 .brand span { color: var(--blue); }
 .top label { color: var(--muted); font-size: 12px; display: flex; align-items: center; gap: 6px; }
 .logos { display: flex; gap: 4px; justify-content: center; flex-wrap: wrap; padding: 8px 18px; border-bottom: 1px solid #ffffff10; background: #ffffff05; }
-.logos .lg { width: 36px; height: 36px; padding: 3px; border-radius: 8px; cursor: pointer; opacity: .55; transition: opacity .15s, transform .15s, background .15s; }
+.logos .lg { width: 36px; height: 36px; padding: 3px; border-radius: 8px; cursor: pointer; opacity: .75; transition: opacity .15s, transform .15s; }
 .logos .lg:hover { opacity: 1; transform: translateY(-2px) scale(1.12); }
 .logos .lg.on { opacity: 1; background: #ffffff1c; box-shadow: 0 0 0 2px var(--blue); }
 .logos .sep { width: 1px; background: #ffffff22; margin: 4px 6px; }
@@ -307,7 +308,7 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
 .inj { color: var(--red); font-size: 10px; font-weight: 800; }
 
 /* modals + drawer */
-.shade { position: fixed; inset: 0; background: #000a; display: none; z-index: 10; backdrop-filter: blur(2px); }
+.shade { position: fixed; inset: 0; background: #000c; display: none; z-index: 10; }
 .shade.on { display: block; animation: fadeIn .2s both; }
 .modal { position: fixed; top: 6vh; left: 50%; transform: translateX(-50%); width: min(840px, 94vw); max-height: 86vh; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; z-index: 11; display: none; flex-direction: column; box-shadow: 0 30px 80px #000c; }
 .modal.on { display: flex; animation: modalIn .25s both; }
@@ -379,6 +380,9 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
 @media (max-width: 1000px) { .tr-grid { grid-template-columns: 1fr 1fr; } .tr-team { min-height: 0; } }
 .update-bar { display: none; position: fixed; right: 16px; bottom: 16px; z-index: 20; background: #0e1a12; border: 1px solid var(--green); border-radius: 10px; padding: 10px 14px; box-shadow: 0 10px 30px #000a; animation: fadeUp .4s both; font-size: 13px; }
 .update-bar.on { display: flex; gap: 10px; align-items: center; }
+/* off-screen rows in long lists aren't laid out or drawn until they scroll into view */
+.prospect { content-visibility: auto; contain-intrinsic-size: auto 290px; }
+.frrow, .pick, .tr-offer, .fbrow { content-visibility: auto; contain-intrinsic-size: auto 58px; }
 .warnbox { background: #2a2210; border: 1px solid var(--superstar); border-radius: 8px; padding: 8px 12px; margin: 8px 0; font-size: 12px; line-height: 1.6; }
 .notes { max-height: 220px; overflow: auto; font-size: 12px; color: var(--muted); background: var(--panel2); border-radius: 8px; padding: 8px 10px; }
 .check { display: flex; gap: 8px; align-items: center; margin: 8px 0; }
@@ -435,6 +439,7 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
   <div class="top">
     <div class="brand">ROSTER<span>BUILDER</span></div>
     <button class="btn" id="toTeams">◀ Teams</button>
+    <label class="rsw" title="Switch roster file and stay on this team">Roster <select id="rosterSel2"></select></label>
     <div class="spacer"></div>
     <button class="btn blue" id="syncBtn" title="Pull the latest trades, signings and injury reports">Sync with NFL</button>
     <button class="btn" id="resetBtn" title="Undo your changes to this team">Reset team</button>
@@ -833,7 +838,7 @@ const ordinal = n => n + (['th','st','nd','rd'][(n % 100 - 20) % 10] || ['th','s
 function logo(teamId, cls = 'logo-img') {
   const n = NFL[teamId]; const t = roster ? team(teamId) : null;
   const fallback = `<div class="logo-txt" style="background:${hex(t?.primary || [40, 50, 80])}">${esc(t?.abbr || '?')}</div>`;
-  return n ? `<img class="${cls}" src="https://a.espncdn.com/i/teamlogos/nfl/500/${n[0]}.png" alt="${esc(t?.abbr)}" data-bg="${hex(t?.primary || [40, 50, 80])}" onerror="logoFailed(this)">` : fallback;
+  return n ? `<img class="${cls}" src="https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/${n[0]}.png&w=160&h=160" decoding="async" alt="${esc(t?.abbr)}" data-bg="${hex(t?.primary || [40, 50, 80])}" onerror="logoFailed(this)">` : fallback;
 }
 function logoFailed(img) {
   const d = document.createElement('div');
@@ -935,6 +940,10 @@ async function boot() {
   try { renderConferences(); } finally { showScreen('#confScreen'); }
   checkForUpdate();
 }
+// tell the app this window is open, and when it closes (closing the last window quits the app)
+const ping = () => fetch('/api/ping', { method: 'POST' }).catch(() => {});
+ping(); setInterval(ping, 10000);
+window.addEventListener('pagehide', () => navigator.sendBeacon('/api/bye'));
 // a newer release on GitHub: say so, with a download button (once per version you choose to skip)
 async function checkForUpdate() {
   try {
@@ -952,6 +961,7 @@ async function loadRoster(file) {
   players = new Map(roster.players.map(p => [p.PGID, p]));
   store.set('rb:lastRoster', file);
   $('#pickTeam').innerHTML = '<option value="">All teams</option>' + roster.teams.map(t => `<option value="${t.id}">${esc(t.abbr)}</option>`).join('');
+  $('#rosterSel').value = file; mirrorRosterPicker();
 }
 
 function freshState(base, teamId) {
@@ -1171,7 +1181,7 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('dblclick', e => { const tl = e.target.closest('[data-tile]'); if (tl) openBuilder(Number(tl.dataset.tile)); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
-function closeAll() { for (const s of ['#shade', '#picker', '#exporter', '#syncer', '#credits', '#league', '#drawer', '#pdrawer', '#draftExporter', '#newProspect', '#frExporter', '#folderBrowser', '#depthModal', '#contractModal', '#trPicker', '#trPending']) $(s).classList.remove('on'); picking = editing = null; }
+function closeAll() { for (const s of ['#shade', '#picker', '#exporter', '#syncer', '#credits', '#league', '#drawer', '#pdrawer', '#draftExporter', '#newProspect', '#frExporter', '#folderBrowser', '#depthModal', '#contractModal', '#trPicker', '#trPending']) $(s).classList.remove('on'); picking = editing = null; $('#pickList').innerHTML = ''; $('#trPickList').innerHTML = ''; }
 const openModal = id => { $('#shade').classList.add('on'); $(id).classList.add('on'); };
 
 // ---- player picker ----
@@ -1198,7 +1208,10 @@ function renderPicks() {
       <div><small>${ht(p.PHGT)} ${p.PWGT}</small></div><div class="chip">${devOf(p).name}</div>
     </div>`).join('') || '<div class="empty-state">No players match.</div>';
 }
-for (const id of ['#pickSearch', '#pickPos', '#pickTeam']) $(id).addEventListener('input', renderPicks);
+// redraw a list once typing pauses instead of on every key
+const debounce = (fn, ms = 120) => { let t; return () => { clearTimeout(t); t = setTimeout(fn, ms); }; };
+$('#pickSearch').addEventListener('input', debounce(renderPicks));
+for (const id of ['#pickPos', '#pickTeam']) $(id).addEventListener('input', renderPicks);
 $('#pickList').addEventListener('click', e => {
   const row = e.target.closest('[data-pick]'); if (!row || !picking) return;
   const { s, d, back } = picking;
@@ -1353,7 +1366,7 @@ function photo(p, cls = '', colors) {
 }
 // k ties the image to a player so a photo found later can swap in place, without redrawing the screen
 const headshot = (url, sil, cls = '', k = '') =>
-  `<img class="${cls}" src="${esc(url && !badPhotos.has(url) ? url : sil)}" data-fallback="${esc(sil)}"${k ? ` data-k="${k}"` : ''} alt="" loading="lazy" onerror="photoFailed(this)">`;
+  `<img class="${cls}" src="${esc(url && !badPhotos.has(url) ? url : sil)}" data-fallback="${esc(sil)}"${k ? ` data-k="${k}"` : ''} alt="" loading="lazy" decoding="async" onerror="photoFailed(this)">`;
 // a photo that won't load (offline, removed) falls back to the silhouette and isn't tried again
 const badPhotos = new Set();
 function photoFailed(img) { badPhotos.add(img.getAttribute('src')); img.onerror = null; img.src = img.dataset.fallback; }
@@ -1394,7 +1407,9 @@ async function fetchPlayerPhotos() {
   if (!batch.length) return;
   try {
     const found = await api('/api/player-photos', { names: batch.map(([n]) => n) });
-    for (const [n, k] of batch) if (found[n]) { shots[k] = found[n]; swapPhotos(); }
+    let any = false;
+    for (const [n, k] of batch) if (found[n]) { shots[k] = found[n]; any = true; }
+    if (any) swapPhotos(); // one pass over the page per batch, not per photo
   } catch {}
   if (photoQueue.size) fetchPlayerPhotos();
 }
@@ -1497,6 +1512,17 @@ document.addEventListener('click', e => {
 });
 
 // ---- toolbar ----
+// the builder's roster picker mirrors the one on the start screen
+function mirrorRosterPicker() { $('#rosterSel2').innerHTML = $('#rosterSel').innerHTML; $('#rosterSel2').value = $('#rosterSel').value; }
+// switch roster from the builder: same team, new file. Accepted-but-unsaved trades belong to the old roster.
+$('#rosterSel2').onchange = async e => {
+  const file = e.target.value, teamId = st?.teamId ?? 16;
+  if (tr.done.length && !confirm(`You have ${tr.done.length} accepted trade${tr.done.length === 1 ? '' : 's'} not saved yet. Switching rosters drops them. Switch anyway?`)) { e.target.value = $('#rosterSel').value; return; }
+  try {
+    $('#rosterSel').value = file; await loadRoster(file); tr.done = []; ranksCache = null; leagueStarter = null;
+    await openBuilder(teamId); toast('Now editing ' + file);
+  } catch (err) { toast(err.message, true); $('#rosterSel2').value = $('#rosterSel').value; }
+};
 $('#rosterSel').onchange = async e => {
   try { await loadRoster(e.target.value); renderConferences(); showScreen('#confScreen'); } catch (err) { toast(err.message, true); }
 };
@@ -1576,6 +1602,7 @@ async function refreshRosterList() {
   const cur = $('#rosterSel').value;
   $('#rosterSel').innerHTML = rosters.map(x => `<option>${esc(x.name)}</option>`).join('');
   $('#rosterSel').value = cur;
+  mirrorRosterPicker();
 }
 $('#doExport').onclick = async () => {
   const btn = $('#doExport'); btn.disabled = true; btn.textContent = 'Exporting…';
@@ -1787,7 +1814,7 @@ function renderTrPicks() {
   $('#trPickList').innerHTML = trSquad(t).filter(p => !taken.has(p.PGID) && (!q || `${p.PFNA} ${p.PLNA}`.toLowerCase().includes(q))).sort((a, b) => b.POVR - a.POVR).map(p =>
     `<div class="pick" data-trpick="${p.PGID}" style="--dev:${devOf(p).color}">${photo(p)}<div class="o">${p.POVR}</div><div><b>${esc(p.PFNA)} ${esc(p.PLNA)}</b><br><small>age ${p.PAGE} · value ${Math.round(tradeValue(p) / 100)}</small></div><div>${posName(p.PPOS)}</div><div></div><div></div><div class="chip">${devOf(p).name}</div></div>`).join('');
 }
-$('#trPickSearch').addEventListener('input', renderTrPicks);
+$('#trPickSearch').addEventListener('input', debounce(renderTrPicks));
 $('#trPickList').addEventListener('click', e => {
   const r = e.target.closest('[data-trpick]'); if (!r) return;
   (tr.picking === 'A' ? tr.sendA : tr.sendB).push(Number(r.dataset.trpick)); tr.verdict = null; closeAll(); renderTrade();
@@ -2014,7 +2041,8 @@ function renderDraft(quiet) {
       <div class="pinfo"><b>${esc(p.firstName)} ${esc(p.lastName)}</b><small>${posName(p.position)} · ${esc(collegeName(p.college))} · ${ht(p.height)} ${p.weight}</small></div>
     </div>`).join('') + (list.length > 160 ? `<div class="empty-state" style="grid-column:1/-1">Showing the first 160 of ${list.length}. Search or filter to find the rest.</div>` : '');
 }
-for (const id of ['#draftSearch', '#draftPos', '#draftSort']) $(id).addEventListener('input', () => renderDraft());
+$('#draftSearch').addEventListener('input', debounce(() => renderDraft()));
+for (const id of ['#draftPos', '#draftSort']) $(id).addEventListener('input', () => renderDraft());
 $('#draftSel').onchange = e => loadDraft(e.target.value);
 $('#openDrafts').onclick = () => openDrafts().catch(e => toast(e.message, true));
 $('#openDrafts2').onclick = () => openDrafts().catch(e => toast(e.message, true));
@@ -2231,7 +2259,7 @@ async function loadFranchise(file) {
 }
 function frLogo(i) {
   const n = NFL[i + 1], t = fr.data.teams.find(x => x.index === i);
-  return n ? `<img class="logo-img" src="https://a.espncdn.com/i/teamlogos/nfl/500/${n[0]}.png" alt="${esc(t?.abbr)}" data-bg="#26324f" onerror="logoFailed(this)">`
+  return n ? `<img class="logo-img" src="https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/${n[0]}.png&w=160&h=160" decoding="async" alt="${esc(t?.abbr)}" data-bg="#26324f" onerror="logoFailed(this)">`
     : `<div class="logo-txt" style="background:#26324f">${esc(t?.abbr || '?')}</div>`;
 }
 function frPhoto(p) {
@@ -2335,7 +2363,8 @@ $('#openFranchise').onclick = () => openFranchise().catch(e => toast(e.message, 
 $('#openFranchise2').onclick = () => openFranchise().catch(e => toast(e.message, true));
 $('#frBack').onclick = () => { if (st) showScreen('#builder'); else { renderConferences(); showScreen('#confScreen'); } };
 $('#frReset').onclick = () => { if (!fr.data) return; fr.edits = NO_EDITS(); saveFr(); renderFranchise(true); toast('Every edit to this save was cleared'); };
-for (const id of ['#frSearch', '#frPos']) $(id).addEventListener('input', () => renderFrList());
+$('#frSearch').addEventListener('input', debounce(() => renderFrList()));
+$('#frPos').addEventListener('input', () => renderFrList());
 $('#franchiseScreen').addEventListener('click', e => {
   const tm = e.target.closest('[data-frteam]');
   if (tm) { fr.team = Number(tm.dataset.frteam); $('#frSearch').value = ''; $('#frPos').value = ''; renderFranchise(); return; }

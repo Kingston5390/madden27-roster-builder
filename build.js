@@ -64,6 +64,14 @@ if (process.platform === 'win32') stripSignature(exe);
 execFileSync(process.platform === 'win32' ? 'npx.cmd' : 'npx', ['--yes', 'postject@1.0.0-alpha.6', exe, 'NODE_SEA_BLOB', config.output,
   '--sentinel-fuse', 'NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2'], { stdio: 'inherit', shell: true });
 
+// a windowed program, so no console window opens next to the app (it logs to %APPDATA%\RosterBuilder\log.txt instead).
+// `node build.js --console` keeps the console, for debugging.
+if (process.platform === 'win32' && !process.argv.includes('--console')) {
+  const buf = fs.readFileSync(exe);
+  buf.writeUInt16LE(2, buf.readUInt32LE(0x3c) + 24 + 68); // optional header Subsystem: 2 = Windows GUI (was 3, console)
+  fs.writeFileSync(exe, buf);
+}
+
 // 4. sign it, when a code-signing certificate is set up: SIGN_PFX (a .pfx file) with SIGN_PFX_PASSWORD, or SIGN_THUMBPRINT
 // for a certificate in your Windows certificate store. Without one the exe stays unsigned.
 if (process.env.SIGN_PFX || process.env.SIGN_THUMBPRINT) {
