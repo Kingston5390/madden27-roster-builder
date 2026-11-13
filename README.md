@@ -86,7 +86,7 @@ A free desktop app for editing **Madden NFL 27** rosters, draft classes and fran
 ## Download and run
 
 1. [Download `RosterBuilder.exe`](https://github.com/Kingston5390/madden27-roster-builder/releases/latest/download/RosterBuilder.exe) (always the latest version, also on the [Releases](../../releases) page).
-2. Double-click it. It finds your saves folder (`Documents\Madden NFL 27\saves`, including when OneDrive moved Documents) and opens in its own window (Chrome if you have it, otherwise Edge; you can also paste the address shown in the console into any browser). Close the app window to quit. There's no console window; if something goes wrong, the details are in `%APPDATA%RosterBuilderlog.txt`.
+2. Double-click it. It finds your saves folder (`Documents\Madden NFL 27\saves`, including when OneDrive moved Documents) and opens in its own window (Chrome if you have it, otherwise Edge; you can also paste the address shown in the console into any browser). Close the app window to quit. There's no console window; if something goes wrong, the details are in `%APPDATA%\RosterBuilder\log.txt`.
 
 If it says no roster files were found, save a roster in Madden first, or click **Choose saves folder**: it lists every Madden saves folder it finds on your PC, or browse to yours. The app remembers it.
 
