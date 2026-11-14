@@ -30,7 +30,7 @@ const walk = dir => fs.readdirSync(dir, { withFileTypes: true }).flatMap(e => e.
 // Madden 27 schema; interned strings fall back to 25 and dictionaries to 26, so those ship too
 const mfWanted = rel => rel === 'dist/index.cjs' || /^data\/(lookup-files\/|schemas\/extra-schemas\.json$|schemas\/27\/M27_|interned-strings\/(25|26|27)\/|zstd-dicts\/(26|27)\/)/.test(rel);
 const assets = { 'index.html': path.join(root, 'ui', 'index.html'), 'THIRD-PARTY-NOTICES.md': path.join(root, 'THIRD-PARTY-NOTICES.md'),
-  'colleges.json': path.join(root, 'lib', 'colleges.json') };
+  'colleges.json': path.join(root, 'lib', 'colleges.json'), 'portraits.json': path.join(root, 'lib', 'portraits.json') };
 for (const rel of walk(mf).map(f => path.relative(mf, f).replace(/\\/g, '/')).filter(mfWanted)) assets[`madden-franchise/${rel}`] = path.join(mf, rel);
 const mfFiles = Object.keys(assets).filter(k => k.startsWith('madden-franchise/'));
 fs.writeFileSync(path.join(dist, 'mf-manifest.json'), JSON.stringify(mfFiles));

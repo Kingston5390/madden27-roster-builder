@@ -94,13 +94,13 @@ If it says no roster files were found, save a roster in Madden first, or click *
 Player photos, team logos and NFL sync need an internet connection. Building, editing and exporting work offline.
 
 ### Legends
-The All-time team button and legend search read legends from any roster in your saves folder with **"Legends"** in its name (for example a community legends roster). Legends are copied into your export with their face models. Photos for legends come from ESPN or Wikipedia.
+The All-time team button and legend search read legends from any roster in your saves folder with **"Legends"** in its name (for example a community legends roster). Legends are copied into your export with their face models and Madden 27's own in-game headshot when the game has one (about 680 legends do; some, like Ben Roethlisberger, have none in Madden 27). Every export also repairs players whose headshot id the game doesn't have. Photos for legends in the app come from ESPN or Wikipedia.
 
 ## Security & verification
 
-**Scan result (v1.2.6):** Microsoft Defender Antivirus, engine 1.1.26100.4, signatures 1.463.121.0, custom scan of `RosterBuilder.exe`: **no threats found**.
+**Scan result (v1.2.7):** Microsoft Defender Antivirus, engine 1.1.26100.4, signatures 1.463.300.0, custom scan of `RosterBuilder.exe`: **no threats found**.
 
-**SHA-256 (v1.2.6):** `4358be297e19e69dc9cb4d351490c275fedc23bb73382f839129e73a266636bb`
+**SHA-256 (v1.2.7):** `c66a7cee3c03a02c2c90188e5a910eccd01c340ff47b88915558b582c55c8311`
 
 Each release lists its own scan result and checksum.
 
