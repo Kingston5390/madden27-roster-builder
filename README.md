@@ -33,7 +33,7 @@ A free desktop app for editing **Madden NFL 27** rosters, draft classes and fran
 - AFC / NFC and Madden-style team select with team ratings, top players, NFL rankings and development-trait counts.
 - Lineup board for offense, defense and special teams with depth slots (LT1, LT2, WR1…WR5 and so on). The team's real depth chart loads first.
 - **Full depth chart** for every position: add players without replacing anyone, reorder, remove, or add the best available.
-- Click **+** on any slot to search all ~3,100 players by name, position or team, or take the **best available** player at that position.
+- Click **+** on any slot to search all ~3,100 players by name, position or team, or take the **best available** player at that position. Typing a name searches every position, so any player, legends included, can play anywhere.
 - All 32 team logos across the top to jump between teams, and a Roster picker to switch roster files without leaving the team.
 
 **A headshot for every player**
@@ -97,9 +97,9 @@ The All-time team button and legend search read legends from any roster in your 
 
 ## Security & verification
 
-**Scan result (v1.2.4):** Microsoft Defender Antivirus, engine 1.1.26100.4, signatures 1.463.121.0, custom scan of `RosterBuilder.exe`: **no threats found**.
+**Scan result (v1.2.5):** Microsoft Defender Antivirus, engine 1.1.26100.4, signatures 1.463.121.0, custom scan of `RosterBuilder.exe`: **no threats found**.
 
-**SHA-256 (v1.2.4):** `bcfd0b93cf6e61d1f60db0b82eb2a9d24c262dd8da69a57c4ef1e352a85a0c22`
+**SHA-256 (v1.2.5):** `8b85be95de8fea894a45e4353858b7495b5183a53dae00986508957a968b9898`
 
 Each release lists its own scan result and checksum.
 

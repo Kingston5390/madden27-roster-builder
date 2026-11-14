@@ -1191,10 +1191,13 @@ function openPicker(s, d) {
   $('#pickPos').innerHTML = '<option value="">All positions</option>' + POS.map((p, i) => `<option value="${i}" ${i === s ? 'selected' : ''}>${p}</option>`).join('');
   $('#pickSearch').value = '';
   openModal('#picker'); renderPicks(); $('#pickSearch').focus();
+  // all-time players are searchable too: load them from the Legends roster the first time (quietly if there isn't one)
+  if (legendsFor !== st.base) loadLegends(true).then(ok => { if (ok && $('#picker').classList.contains('on')) renderPicks(); });
 }
 function renderPicks() {
   const q = $('#pickSearch').value.trim().toLowerCase();
-  const pos = $('#pickPos').value, tm = $('#pickTeam').value;
+  // typing a name searches every position, so anyone (legends included) can play anywhere
+  const pos = q ? '' : $('#pickPos').value, tm = $('#pickTeam').value;
   const inLineup = lineupIds();
   const list = [...players.values()].map(p => P(p.PGID))
     .filter(p => (!q || `${p.PFNA} ${p.PLNA}`.toLowerCase().includes(q)) && (pos === '' || p.PPOS === Number(pos)) && (tm === '' || (tm === 'legends' ? p.legend : !p.legend && p.TGID === Number(tm))))
@@ -1441,17 +1444,18 @@ function bestAvailable(s) {
 
 // ---- legends (from a ROSTER file with "Legends" in its name) ----
 let legendsFor = null;
-async function loadLegends() {
+async function loadLegends(quiet) {
   if (legendsFor === st.base) return true;
+  if (quiet && legendsFor === 'none:' + st.base) return false; // already looked: this roster folder has no Legends file
   try {
     const r = await api('/api/legends?base=' + encodeURIComponent(st.base));
     for (const p of r.players) players.set(p.PGID, p);
     // photos already found for legends (the server keeps fetching the rest in the background)
     for (const [name, url] of Object.entries(r.photos || {})) { const k = normName(name); askedPhotos.add(k); if (url) shots[k] = url; }
     legendsFor = st.base;
-    if (!$('#pickTeam option[value="legends"]')) $('#pickTeam').insertAdjacentHTML('beforeend', '<option value="legends">LEGENDS</option>');
+    if (!$('#pickTeam option[value="legends"]')) $('#pickTeam option[value=""]').insertAdjacentHTML('afterend', '<option value="legends">🏆 Legends only</option>');
     return true;
-  } catch (e) { toast(e.message, true); return false; }
+  } catch (e) { if (quiet) legendsFor = 'none:' + st.base; else toast(e.message, true); return false; }
 }
 async function allTimeTeam() {
   if (!(await loadLegends())) return;

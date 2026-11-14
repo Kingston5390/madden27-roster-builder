@@ -17,7 +17,7 @@ const args = process.argv.slice(2);
 const flag = name => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : undefined; };
 const PORT = Number(flag('--port') ?? 8790);
 const OPEN = !args.includes('--no-open');
-const VERSION = '1.2.4'; // keep in step with package.json
+const VERSION = '1.2.5'; // keep in step with package.json
 const APP_DIR = path.join(process.env.APPDATA || os.homedir(), 'RosterBuilder');
 
 // The exe has no console window, so what it would print also goes to a log file (newest run at the bottom)
