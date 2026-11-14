@@ -75,6 +75,7 @@ A free desktop app for editing **Madden NFL 27** rosters, draft classes and fran
 - **Development traits** that stick in Franchise: Normal, Star, Superstar or X-Factor for any player, or the whole team at once.
 - **Ability ranks**: Bronze, Silver, Gold or Platinum for each ability a player has.
 - **Contracts**: years left and salary per year for any player.
+- **Start at a real week**: pick a week of the current NFL season and get a new save with every real result before it. Either sim to that week in Madden (Madden plays each game with its real winner) or open the save already at that week with real scores, records and standings written in (experimental; needs a save from the regular season).
 - **Coaches**: raise your head coach and coordinators to level 49 and unlock every talent tier. Vacant jobs are shown as vacant.
 - Saves a new `CAREER-` file, then reads it back to check every change. Load it in Madden from Franchise → Load.
 
@@ -97,9 +98,9 @@ The All-time team button and legend search read legends from any roster in your 
 
 ## Security & verification
 
-**Scan result (v1.2.5):** Microsoft Defender Antivirus, engine 1.1.26100.4, signatures 1.463.121.0, custom scan of `RosterBuilder.exe`: **no threats found**.
+**Scan result (v1.2.6):** Microsoft Defender Antivirus, engine 1.1.26100.4, signatures 1.463.121.0, custom scan of `RosterBuilder.exe`: **no threats found**.
 
-**SHA-256 (v1.2.5):** `8b85be95de8fea894a45e4353858b7495b5183a53dae00986508957a968b9898`
+**SHA-256 (v1.2.6):** `4358be297e19e69dc9cb4d351490c275fedc23bb73382f839129e73a266636bb`
 
 Each release lists its own scan result and checksum.
 

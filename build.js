@@ -11,8 +11,8 @@ fs.mkdirSync(dist, { recursive: true });
 
 // 1. bundle: each local module becomes a function in a tiny registry; local require() calls go through it
 const modules = { tdb2: 'lib/tdb2.js', roster: 'lib/roster.js', sync: 'lib/sync.js', league: 'lib/league.js', photos: 'lib/photos.js', draft: 'lib/draft.js',
-  franchise: 'lib/franchise.js', college: 'lib/college.js' };
-const localReq = src => src.replace(/require\('\.\/(?:lib\/)?(tdb2|roster|sync|league|photos|draft|franchise|college)'\)/g, "__local('$1')");
+  franchise: 'lib/franchise.js', college: 'lib/college.js', season: 'lib/season.js' };
+const localReq = src => src.replace(/require\('\.\/(?:lib\/)?(tdb2|roster|sync|league|photos|draft|franchise|college|season)'\)/g, "__local('$1')");
 let out = "'use strict';\nconst __defs = {}, __cache = {};\nfunction __local(n) { if (!__cache[n]) { const module = { exports: {} }; __cache[n] = module; __defs[n](module, module.exports); } return __cache[n].exports; }\n";
 for (const [name, file] of Object.entries(modules))
   out += `__defs[${JSON.stringify(name)}] = function (module, exports) {\n${localReq(fs.readFileSync(path.join(root, file), 'utf8'))}\n};\n`;

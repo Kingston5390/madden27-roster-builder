@@ -545,6 +545,7 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
     <div class="spacer"></div>
     <label>Franchise save <select id="frSel"></select></label>
     <button class="btn" id="frReset" title="Undo every change to this save">Reset edits</button>
+    <button class="btn blue" id="frRealBtn" title="Start this franchise at a real NFL week, with real results so far">📅 Start at a real week</button>
     <button class="btn green" id="frExportBtn">Save as new franchise</button>
     <button class="btn mute" data-mute title="Sound on/off">🔊</button>
   </div>
@@ -610,6 +611,24 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
     </div>
     <p id="ctNote" style="color:var(--muted);font-size:12px"></p>
     <div style="display:flex;gap:8px"><button class="btn green" id="ctSave">Save contract</button><button class="btn" id="ctUndo">Keep original</button></div>
+  </div>
+</div>
+
+<div class="modal" id="realWeek" style="width:min(620px,94vw)">
+  <header><h2>Start at a real week</h2><div class="spacer"></div><button class="btn" data-close>Close</button></header>
+  <div class="list" style="padding:16px">
+    <div id="rwStatus" class="notes">Getting this season's results from ESPN…</div>
+    <div class="grid2" style="margin-top:12px">
+      <label class="field">Start at week<select class="input" id="rwWeek"></select></label>
+      <label class="field">New franchise save name<input class="input" id="rwName"></label>
+    </div>
+    <div class="field" style="margin-top:10px">How it starts
+      <label class="check"><input type="radio" name="rwMode" value="sim" checked> <span><b>Sim to the week in Madden</b> (tested): Madden plays every earlier game with its real winner, with box scores and stats.</span></label>
+      <label class="check"><input type="radio" name="rwMode" value="open"> <span><b>Open already at the week</b> (experimental): real scores, records and standings written in, nothing to sim. Needs a save in the regular season; skipped weeks have no box scores or player stats.</span></label>
+    </div>
+    <div class="warnbox" id="rwHow"></div>
+    <div style="display:flex;gap:8px"><button class="btn green" id="rwGo">Make the franchise</button></div>
+    <div id="rwResult" style="margin-top:12px"></div>
   </div>
 </div>
 
@@ -1181,7 +1200,7 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('dblclick', e => { const tl = e.target.closest('[data-tile]'); if (tl) openBuilder(Number(tl.dataset.tile)); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
-function closeAll() { for (const s of ['#shade', '#picker', '#exporter', '#syncer', '#credits', '#league', '#drawer', '#pdrawer', '#draftExporter', '#newProspect', '#frExporter', '#folderBrowser', '#depthModal', '#contractModal', '#trPicker', '#trPending']) $(s).classList.remove('on'); picking = editing = null; $('#pickList').innerHTML = ''; $('#trPickList').innerHTML = ''; }
+function closeAll() { for (const s of ['#shade', '#picker', '#exporter', '#syncer', '#credits', '#league', '#drawer', '#pdrawer', '#draftExporter', '#newProspect', '#frExporter', '#folderBrowser', '#depthModal', '#contractModal', '#trPicker', '#trPending', '#realWeek']) $(s).classList.remove('on'); picking = editing = null; $('#pickList').innerHTML = ''; $('#trPickList').innerHTML = ''; }
 const openModal = id => { $('#shade').classList.add('on'); $(id).classList.add('on'); };
 
 // ---- player picker ----
@@ -2337,6 +2356,49 @@ function renderFrList(quiet) {
     </div>`;
   }).join('') + (list.length > 200 ? `<div class="empty-state" style="padding:20px">Showing 200 of ${list.length}. Search to narrow it down.</div>` : '') || '<div class="empty-state">No players match.</div>';
 }
+// start at a real week: real winners for every game already final this season, set as Madden's force-wins in a new save
+let realSeason = null;
+const rwMode = () => document.querySelector('[name="rwMode"]:checked')?.value ?? 'sim';
+const rwHelp = () => {
+  const w = Number($('#rwWeek').value), last = realSeason?.lastWeek ?? 0, partial = w <= last && realSeason.games.some(g => g.week === w);
+  if (rwMode() === 'open') {
+    $('#rwHow').innerHTML = `The new save opens at <b>week ${w}</b> with every real score before it, and real records, splits, points and standings (ties included). Experimental: Madden's own work for the skipped weeks (box scores, player stats, injuries, news) doesn't happen.<br>This needs a save from the <b>regular season</b>: start your franchise, advance to week 1, save, and pick that save here.`;
+    return;
+  }
+  $('#rwHow').innerHTML = `In Madden: load the new save, then <b>Advance → Sim to Week ${w}</b>. Madden plays every earlier game with its real winner, so records and standings match real life (the scores are Madden's own).` +
+    (partial ? `<br>Week ${w} games already final (${realSeason.games.filter(g => g.week === w).map(g => esc(g.label)).join(', ')}) are set too: they come out right when week ${w} is played.` : '') +
+    '<br>Use a save from before week 1 is played: games your save already played keep their results. Ties can\'t be forced, so a real tie gets a winner.';
+};
+$('#frRealBtn').onclick = async () => {
+  if (!fr.data) return;
+  openModal('#realWeek'); $('#rwResult').innerHTML = ''; $('#rwGo').disabled = true; $('#rwWeek').innerHTML = ''; // filled again once ESPN answers
+  try {
+    realSeason = await api('/api/real-season');
+    const last = realSeason.lastWeek;
+    $('#rwStatus').textContent = last ? `${realSeason.year} season: ${realSeason.games.length} games final, through week ${last}.` : `No ${realSeason.year} regular-season games are final yet.`;
+    $('#rwWeek').innerHTML = Array.from({ length: Math.min(18, last + 1) }, (_, i) => i + 1).map(w => `<option value="${w}" ${w === Math.min(18, last + 1) ? 'selected' : ''}>Week ${w}</option>`).join('');
+    const mine = fr.data.teams.find(t => t.index === fr.data.coaches.find(c => c.user)?.team);
+    const setName = () => { $('#rwName').value = `${mine?.abbr || 'MY'}WEEK${$('#rwWeek').value}`.replace(/[^A-Za-z0-9]/g, '').toUpperCase(); rwHelp(); };
+    $('#rwWeek').onchange = setName; setName(); document.querySelectorAll('[name="rwMode"]').forEach(r => { r.onchange = rwHelp; }); $('#rwGo').disabled = !last;
+  } catch (e) { $('#rwStatus').textContent = `Couldn't reach ESPN: ${e.message}`; }
+};
+$('#rwGo').onclick = async () => {
+  const btn = $('#rwGo'); btn.disabled = true; btn.textContent = 'Working…';
+  try {
+    const r = await api('/api/franchise-realweek', { base: fr.file, outName: $('#rwName').value, week: Number($('#rwWeek').value), year: realSeason.year, mode: rwMode() });
+    if (r.mode === 'open') {
+      $('#rwResult').innerHTML = `<div style="color:#31d07a;font-weight:700">Saved ${esc(r.file)}: opens at week ${r.week} with ${r.written} real results.</div>
+        <div class="notes" style="margin-top:6px">Top of the league: ${r.standings.slice(0, 6).map(esc).join(', ')}<br>${r.missing.length ? `Not found in this save's schedule: ${r.missing.map(esc).join(', ')}<br>` : ''}In Madden: Franchise → Load → ${esc(r.file.replace(/^CAREER-/, ''))}.</div>`;
+    } else
+    $('#rwResult').innerHTML = `<div style="color:#31d07a;font-weight:700">Saved ${esc(r.file)}: ${r.forced} games set to their real winners.</div>
+      <div class="notes" style="margin-top:6px">${r.played ? `${r.played} games were already played in this save and keep their results.<br>` : ''}${r.ties.length ? `Real ties (Madden will pick a winner): ${r.ties.map(esc).join(', ')}<br>` : ''}${r.missing.length ? `Not found in this save's schedule: ${r.missing.map(esc).join(', ')}<br>` : ''}In Madden: Franchise → Load → ${esc(r.file.replace(/^CAREER-/, ''))}, then Advance → Sim to Week ${r.week}.</div>`;
+    Sound.fanfare(); toast('Franchise saved: ' + r.file);
+    const { franchises } = await api('/api/franchises');
+    $('#frSel').innerHTML = franchises.map(f => `<option>${esc(f.name)}</option>`).join(''); $('#frSel').value = fr.file;
+  } catch (e) { $('#rwResult').innerHTML = `<div style="color:var(--red)">${esc(e.message)}</div>`; Sound.error(); }
+  btn.disabled = false; btn.textContent = 'Make the franchise';
+};
+
 // contract window: years left and salary per year, from this season on
 let contractPlayer = null;
 function openContract(p) {
