@@ -190,6 +190,24 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
 .abil { display: flex; gap: 6px; flex-wrap: wrap; }
 .cchip { display: inline-block; margin-top: 3px; font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 10px; border: 1px solid var(--line); background: #0b1220; color: #9fd8b0; cursor: pointer; }
 .cchip:hover { border-color: var(--blue); } .cchip.on { border-color: var(--superstar); color: var(--superstar); }
+.jbox { margin-top: 12px; border: 1px solid var(--superstar); border-radius: 10px; padding: 10px 12px; background: #f5c5420d; }
+.jhead { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; } .jhead span { color: var(--muted); font-size: 12px; } .jhead .btn { padding: 5px 9px; font-size: 12px; }
+.jrow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr) 64px; gap: 8px; align-items: center; padding: 6px 0; border-top: 1px solid #ffffff10; }
+.jrow small { display: block; color: var(--muted); font-size: 11px; }
+@media (max-width: 640px) { .jrow { grid-template-columns: 1fr 64px; } .jrow > :first-child { grid-column: 1 / -1; } }
+.ctgrid { display: grid; grid-template-columns: 70px 1fr 1fr; gap: 6px 10px; align-items: center; margin-top: 12px; max-height: 300px; overflow: auto; }
+.ctgrid .h { font-size: 11px; color: var(--muted); font-weight: 700; }
+.ctgrid input:disabled { opacity: .35; }
+.ctsum { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; } .ctsum b { color: #9fd8b0; }
+.ctsbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--line); }
+.ctsbar > span { font-size: 10px; letter-spacing: 1px; color: var(--muted); font-weight: 800; margin: 0 2px 0 8px; }
+.ctsbar .btn { padding: 5px 9px; font-size: 12px; }
+.ctshead, .ctsrow { display: grid; grid-template-columns: minmax(0, 2.2fr) 70px 110px 110px 90px 80px 60px; gap: 8px; align-items: center; padding: 6px 16px; }
+.ctshead { font-size: 11px; color: var(--muted); font-weight: 700; border-bottom: 1px solid var(--line); }
+.ctsrow { border-bottom: 1px solid #ffffff0d; content-visibility: auto; contain-intrinsic-size: 44px; } .ctsrow.edited { background: #f5c54214; }
+.ctsrow small { color: var(--muted); font-size: 11px; display: block; } .ctsrow .input { padding: 4px 6px; }
+.ctsfoot { padding: 10px 16px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+@media (max-width: 760px) { .ctshead { display: none; } .ctsrow { grid-template-columns: 1fr 1fr 1fr; } .ctsrow > :first-child { grid-column: 1 / -1; } }
 .abil select { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 12px; border: 0; color: #111; background: var(--rk); cursor: pointer; }
 .abil .none { color: var(--muted); font-size: 11px; }
 @media (max-width: 900px) { .coaches { grid-template-columns: 1fr; } .frrow { grid-template-columns: 44px 44px minmax(0, 1fr); } .frrow .seg, .frrow .abil { grid-column: 1 / -1; } }
@@ -602,16 +620,43 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
   </div>
 </div>
 
-<div class="modal" id="contractModal" style="width:min(420px,94vw)">
+<div class="modal" id="contractModal" style="width:min(560px,94vw)">
   <header><h2 id="ctTitle">Contract</h2><div class="spacer"></div><button class="btn" data-close>Close</button></header>
   <div class="list" style="padding:16px">
     <div class="grid2">
-      <label class="field">Years left<select class="input" id="ctYears"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option></select></label>
-      <label class="field">Salary per year ($ millions)<input class="input" id="ctSalary" type="number" min="0.3" max="100" step="0.25"></label>
+      <label class="field">Years<select class="input" id="ctYears"></select></label>
+      <label class="field">Same salary every year ($M)<span style="display:flex;gap:6px"><input class="input" id="ctFlat" type="number" min="0.3" max="163" step="0.25"><button class="btn" id="ctFlatGo">Fill</button></span></label>
     </div>
+    <div class="ctgrid" id="ctGrid"></div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;margin:10px 0">
+      <label><input type="checkbox" id="ctGuar"> Fully guaranteed</label>
+      <label><input type="checkbox" id="ctNtc"> No-trade clause</label>
+    </div>
+    <div id="ctSum" class="ctsum"></div>
     <p id="ctNote" style="color:var(--muted);font-size:12px"></p>
     <div style="display:flex;gap:8px"><button class="btn green" id="ctSave">Save contract</button><button class="btn" id="ctUndo">Keep original</button></div>
   </div>
+</div>
+
+<div class="modal" id="contractsModal" style="width:min(1000px,96vw)">
+  <header><h2 id="ctsTitle">Contracts</h2><div class="spacer"></div>
+    <label>Apply to <select class="input" id="ctsScope" style="width:auto;display:inline-block"><option value="team">This team</option><option value="league">Whole league</option></select></label>
+    <button class="btn" data-close>Close</button></header>
+  <div class="ctsbar">
+    <span>LENGTH</span>
+    <button class="btn" data-cq="len10">All 10-year</button><button class="btn" data-cq="len7">All 7-year</button><button class="btn" data-cq="len5">All 5-year</button><button class="btn" data-cq="len1">All 1-year</button>
+    <button class="btn" data-cq="ext1">+1 year</button><button class="btn" data-cq="ext3">+3 years</button>
+    <span>MONEY</span>
+    <button class="btn" data-cq="min">League minimum</button><button class="btn" data-cq="half">Half price</button><button class="btn" data-cq="double">Double</button><button class="btn" data-cq="ovr">Pay by overall</button><button class="btn" data-cq="nobonus">No bonuses</button>
+    <span>TERMS</span>
+    <button class="btn" data-cq="guar">All guaranteed</button><button class="btn" data-cq="ntc">No-trade on</button><button class="btn" data-cq="ntcoff">No-trade off</button>
+    <span>CUSTOM</span>
+    <select class="input" id="ctsYears" style="width:auto"></select><input class="input" id="ctsSalary" type="number" min="0.3" max="163" step="0.25" placeholder="$M / yr" style="width:90px"><button class="btn blue" data-cq="custom">Set</button>
+    <button class="btn" data-cq="undo">Undo contracts</button>
+  </div>
+  <div class="ctshead"><span>Player</span><span>Years</span><span>Salary / yr ($M)</span><span>Bonus yr 1 ($M)</span><span>Total</span><span>Cap hit</span><span></span></div>
+  <div class="list" id="ctsList"></div>
+  <div class="ctsfoot" id="ctsFoot"></div>
 </div>
 
 <div class="modal" id="realWeek" style="width:min(620px,94vw)">
@@ -669,6 +714,7 @@ select, .input { background: var(--panel2); border: 1px solid var(--line); borde
     <p style="color:var(--muted);font-size:12px">Players picked from other teams move to this team. Your base roster file is never changed; this always writes a new file.</p>
     <div id="exportSummary" class="notes"></div>
     <div id="exportWarn"></div>
+    <div id="jerseyBox"></div>
     <div style="margin-top:14px;display:flex;gap:8px"><button class="btn green" id="doExport">Export</button></div>
     <div id="exportResult" style="margin-top:12px"></div>
   </div>
@@ -1200,7 +1246,7 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('dblclick', e => { const tl = e.target.closest('[data-tile]'); if (tl) openBuilder(Number(tl.dataset.tile)); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
-function closeAll() { for (const s of ['#shade', '#picker', '#exporter', '#syncer', '#credits', '#league', '#drawer', '#pdrawer', '#draftExporter', '#newProspect', '#frExporter', '#folderBrowser', '#depthModal', '#contractModal', '#trPicker', '#trPending', '#realWeek']) $(s).classList.remove('on'); picking = editing = null; $('#pickList').innerHTML = ''; $('#trPickList').innerHTML = ''; }
+function closeAll() { for (const s of ['#shade', '#picker', '#exporter', '#syncer', '#credits', '#league', '#drawer', '#pdrawer', '#draftExporter', '#newProspect', '#frExporter', '#folderBrowser', '#depthModal', '#contractModal', '#contractsModal', '#trPicker', '#trPending', '#realWeek']) $(s).classList.remove('on'); picking = editing = null; $('#pickList').innerHTML = ''; $('#trPickList').innerHTML = ''; }
 const openModal = id => { $('#shade').classList.add('on'); $(id).classList.add('on'); };
 
 // ---- player picker ----
@@ -1616,10 +1662,47 @@ $('#exportBtn').onclick = () => {
     $('#exportWarn').innerHTML = size > 75 ? `<div style="color:var(--superstar);margin-top:8px">The team would have ${size} players. Madden allows 75 at most, so check "Release players not in the lineup".</div>` : '';
   };
   $('#optRelease').checked = onTeam + moved.length > 75; // only needed to stay under Madden's 75-player limit
-  $('#optRelease').onchange = warn; warn();
+  $('#optRelease').onchange = () => { warn(); checkJerseys(); }; warn();
   $('#exportResult').innerHTML = '';
+  jerseyChoices = {}; checkJerseys();
   openModal('#exporter');
 };
+// jersey numbers: players joining the team keep theirs (a legend's real number) unless a teammate wears it; then you choose
+let jerseyChoices = {}, jerseyConflicts = [];
+const exportBody = () => ({ base: st.base, teamId: st.teamId, slots: st.slots, edits: st.edits, identity: st.identity,
+  heal: $('#optHeal').checked, releaseOthers: $('#optRelease').checked, jerseys: jerseyChoices });
+async function checkJerseys() {
+  $('#jerseyBox').innerHTML = '';
+  try { jerseyConflicts = (await api('/api/export-check', exportBody())).conflicts ?? []; } catch { jerseyConflicts = []; }
+  // the newcomer gets his own number unless you pick otherwise (a number you typed in the editor can't be taken)
+  for (const c of jerseyConflicts) if (!(c.id in jerseyChoices)) jerseyChoices[c.id] = c.locked ? 'new' : 'take';
+  renderJerseys();
+}
+function renderJerseys() {
+  if (!jerseyConflicts.length) { $('#jerseyBox').innerHTML = ''; return; }
+  $('#jerseyBox').innerHTML = `<div class="jbox"><div class="jhead"><b>Jersey numbers</b><span>${jerseyConflicts.length} player${jerseyConflicts.length === 1 ? ' wants a number' : 's want numbers'} a teammate already wears</span>
+      <div class="spacer"></div><button class="btn blue" data-jall="take">Force all their numbers</button><button class="btn" data-jall="new">New numbers for all</button></div>` +
+    jerseyConflicts.map(c => {
+      const ch = jerseyChoices[c.id], custom = typeof ch === 'number';
+      return `<div class="jrow"><div><b>${esc(c.name)}</b> ${esc(c.pos)} wants <b>#${c.want}</b><small>worn by ${esc(c.holder)} ${esc(c.holderPos)}${c.locked ? ' (you set that number, so it stays)' : ''}</small></div>
+        <select class="input" data-jc="${c.id}">
+          <option value="take" ${ch === 'take' ? 'selected' : ''} ${c.locked ? 'disabled' : ''}>Give ${esc(c.name.split(' ').pop())} #${c.want} (${esc(c.holder.split(' ').pop())} gets a new number)</option>
+          <option value="new" ${ch === 'new' ? 'selected' : ''}>${esc(c.name.split(' ').pop())} wears #${c.alt}</option>
+          <option value="custom" ${custom ? 'selected' : ''}>Pick a number…</option>
+        </select>
+        <input class="input" type="number" min="0" max="99" data-jn="${c.id}" value="${custom ? ch : ''}" placeholder="#" style="${custom ? '' : 'visibility:hidden'}"></div>`;
+    }).join('') + '</div>';
+}
+$('#jerseyBox').addEventListener('change', e => {
+  const sel = e.target.closest('[data-jc]'), num = e.target.closest('[data-jn]');
+  if (sel) { const id = sel.dataset.jc; jerseyChoices[id] = sel.value === 'custom' ? (Number($(`[data-jn="${id}"]`).value) || 0) : sel.value; renderJerseys(); if (sel.value === 'custom') $(`[data-jn="${id}"]`).focus(); }
+  if (num) { const n = Math.round(Number(num.value)); if (n >= 0 && n <= 99) jerseyChoices[num.dataset.jn] = n; else toast('Pick a number from 0 to 99', true); }
+});
+$('#jerseyBox').addEventListener('click', e => {
+  const b = e.target.closest('[data-jall]'); if (!b) return;
+  for (const c of jerseyConflicts) jerseyChoices[c.id] = b.dataset.jall === 'take' && !c.locked ? 'take' : 'new';
+  renderJerseys(); toast(b.dataset.jall === 'take' ? 'Everyone joining keeps their own number' : 'Players joining get new numbers');
+});
 async function refreshRosterList() {
   const { rosters } = await api('/api/rosters');
   const cur = $('#rosterSel').value;
@@ -1630,11 +1713,7 @@ async function refreshRosterList() {
 $('#doExport').onclick = async () => {
   const btn = $('#doExport'); btn.disabled = true; btn.textContent = 'Exporting…';
   try {
-    const r = await api('/api/export', {
-      base: st.base, outName: $('#outName').value, teamId: st.teamId,
-      slots: st.slots, edits: st.edits, identity: st.identity,
-      heal: $('#optHeal').checked, releaseOthers: $('#optRelease').checked,
-    });
+    const r = await api('/api/export', { ...exportBody(), outName: $('#outName').value });
     $('#exportResult').innerHTML = `<div style="color:#31d07a;font-weight:700">Saved ${esc(r.file)} (${r.players} players on the team)</div>` +
       (r.notes.length ? `<div class="notes" style="margin-top:8px">${r.notes.map(esc).join('<br>')}</div>` : '') +
       `<p style="color:var(--muted);font-size:12px">In Madden, load this roster from your saved rosters.</p>`;
@@ -2313,6 +2392,7 @@ function renderFranchise(quiet) {
       <button class="btn" data-fq="ss">All Superstar</button>
       <button class="btn" data-fq="plat">Abilities to Platinum</button>
       <button class="btn" data-fq="coaches">Max all coaches</button>
+      <button class="btn blue" data-fq="contracts">💰 Contracts</button>
       <button class="btn" data-fq="undo">Undo team edits</button>
     </div>`;
   renderFrCoaches(quiet);
@@ -2399,24 +2479,124 @@ $('#rwGo').onclick = async () => {
   btn.disabled = false; btn.textContent = 'Make the franchise';
 };
 
-// contract window: years left and salary per year, from this season on
-let contractPlayer = null;
-function openContract(p) {
-  contractPlayer = p; const c = frContract(p);
-  $('#ctTitle').textContent = `${p.first} ${p.last} contract`;
-  $('#ctYears').value = String(Math.min(7, c.years)); $('#ctSalary').value = (c.salary / 100).toFixed(2);
-  $('#ctNote').textContent = `In the save: ${money(p.contract.salary)} a year, ${p.contract.years} year${p.contract.years === 1 ? '' : 's'} left${p.contract.bonus ? `, plus a ${money(p.contract.bonus)} bonus this year` : ''}. Bonuses past the new length are dropped.`;
-  openModal('#contractModal');
+// contracts: an edit is a whole new deal { schedule: [{salary, bonus}], noTrade, guaranteed }, starting this season, up to 10 years
+// (Madden stores salaries for 10 contract years and bonuses for the first 7). Money is in Madden's $10K units.
+const CT_MAX = 10, CT_BONUS = 7, CT_MIN = 80, CT_CAP = 16383;
+const ctMoney = (v, lo = 0) => Math.max(lo, Math.min(CT_CAP, Math.round(Number(v) || 0)));
+function ctMake(schedule, noTrade, guaranteed) {
+  schedule = schedule.slice(0, CT_MAX).map((y, i) => ({ salary: ctMoney(y.salary, 30), bonus: i < CT_BONUS ? ctMoney(y.bonus) : 0 }));
+  return { schedule, noTrade: !!noTrade, guaranteed: !!guaranteed, years: schedule.length, salary: schedule[0].salary, bonus: schedule[0].bonus };
 }
-$('#ctSave').onclick = () => {
-  const p = contractPlayer, years = Number($('#ctYears').value), salary = Math.round(Number($('#ctSalary').value) * 100);
-  if (!(salary >= 30 && salary <= 10000)) return toast('Salary must be between $0.3M and $100M a year', true);
-  const same = years === p.contract.years && salary === p.contract.salary;
-  setPlayerEdit(p, 'contract', { years, salary }, same); saveFr(); closeAll(); renderFranchise(true);
-  toast(same ? 'Contract left as it was' : `${p.first} ${p.last}: ${money(salary)} a year for ${years} year${years === 1 ? '' : 's'}`);
+// the contract as it stands (save + edits), always with a year-by-year schedule
+function ctNow(p) {
+  const c = frContract(p);
+  if (c.schedule) return ctMake(c.schedule, c.noTrade, c.guaranteed);
+  return ctMake(Array.from({ length: c.years }, (_, i) => ({ salary: c.salary, bonus: p.contract.schedule?.[i]?.bonus ?? 0 })), p.contract.noTrade, p.contract.guaranteed); // older edit: same salary every year
+}
+const ctTotal = c => c.schedule.reduce((t, y) => t + y.salary + y.bonus, 0);
+const ctSame = (a, b) => JSON.stringify([a.schedule, a.noTrade, a.guaranteed]) === JSON.stringify([b.schedule, b.noTrade, b.guaranteed]);
+function setContractEdit(p, c) { setPlayerEdit(p, 'contract', c, !c || ctSame(c, p.contract)); }
+// stretch or cut a deal to n years: added years repeat the last salary, with no bonus
+const ctLength = (c, n) => Array.from({ length: n }, (_, i) => c.schedule[i] ?? { salary: c.schedule[c.schedule.length - 1].salary, bonus: 0 });
+const ctYearOpts = n => Array.from({ length: CT_MAX }, (_, i) => `<option value="${i + 1}" ${i + 1 === n ? 'selected' : ''}>${i + 1}</option>`).join('');
+
+// one player's contract, year by year
+let contractPlayer = null, ctDraft = null;
+function openContract(p) {
+  contractPlayer = p; ctDraft = ctNow(p);
+  $('#ctTitle').textContent = `${p.first} ${p.last} contract`;
+  $('#ctYears').innerHTML = ctYearOpts(ctDraft.years); $('#ctFlat').value = (ctDraft.salary / 100).toFixed(2);
+  $('#ctGuar').checked = ctDraft.guaranteed; $('#ctNtc').checked = ctDraft.noTrade;
+  const o = p.contract;
+  $('#ctNote').textContent = `In the save: ${o.years} year${o.years === 1 ? '' : 's'} left, ${money(ctTotal(o))} total. Saving makes this a new deal that starts this season. Bonuses exist only for the first ${CT_BONUS} years.`;
+  renderCtGrid(); openModal('#contractModal');
+}
+function readCtGrid() {
+  const sched = ctDraft.schedule.map((_, i) => ({ salary: Number($(`#ctS${i}`).value) * 100, bonus: Number($(`#ctB${i}`).value || 0) * 100 }));
+  ctDraft = ctMake(sched, $('#ctNtc').checked, $('#ctGuar').checked);
+}
+function renderCtGrid() {
+  $('#ctGrid').innerHTML = '<span class="h">Year</span><span class="h">Salary ($M)</span><span class="h">Bonus ($M)</span>' + ctDraft.schedule.map((y, i) =>
+    `<span>Year ${i + 1}</span><input class="input" id="ctS${i}" type="number" min="0.3" max="163" step="0.25" value="${(y.salary / 100).toFixed(2)}">
+     <input class="input" id="ctB${i}" type="number" min="0" max="163" step="0.25" value="${(y.bonus / 100).toFixed(2)}" ${i >= CT_BONUS ? 'disabled title="Madden stores bonuses for the first 7 years only"' : ''}>`).join('');
+  renderCtSum();
+}
+function renderCtSum() { $('#ctSum').innerHTML = `<span>Total value <b>${money(ctTotal(ctDraft))}</b></span><span>Average <b>${money(ctTotal(ctDraft) / ctDraft.years)}</b> a year</span><span>Cap hit this year <b>${money(ctDraft.salary + ctDraft.bonus)}</b></span>`; }
+$('#ctGrid').addEventListener('input', () => { readCtGrid(); renderCtSum(); });
+$('#ctYears').onchange = () => { readCtGrid(); ctDraft = ctMake(ctLength(ctDraft, Number($('#ctYears').value)), ctDraft.noTrade, ctDraft.guaranteed); renderCtGrid(); };
+$('#ctFlatGo').onclick = () => {
+  const s = Number($('#ctFlat').value) * 100; if (!(s >= 30)) return toast('Enter a salary of at least $0.3M', true);
+  readCtGrid(); ctDraft = ctMake(ctDraft.schedule.map(y => ({ ...y, salary: s })), ctDraft.noTrade, ctDraft.guaranteed); renderCtGrid();
 };
-$('#ctUndo').onclick = () => { setPlayerEdit(contractPlayer, 'contract', null, true); saveFr(); closeAll(); renderFranchise(true); };
+$('#ctSave').onclick = () => {
+  const p = contractPlayer;
+  if (ctDraft.schedule.some((_, i) => !(Number($(`#ctS${i}`).value) >= 0.3))) return toast('Every year needs a salary of at least $0.3M', true);
+  readCtGrid(); setContractEdit(p, ctDraft); saveFr(); closeAll(); renderFranchise(true);
+  toast(ctSame(ctDraft, p.contract) ? 'Contract left as it was' : `${p.first} ${p.last}: ${ctDraft.years} year${ctDraft.years === 1 ? '' : 's'}, ${money(ctTotal(ctDraft))} total`);
+};
+$('#ctUndo').onclick = () => { setContractEdit(contractPlayer, null); saveFr(); closeAll(); renderFranchise(true); };
+
+// every contract on a team (or the league) in one table, with bulk buttons
+const ctsLeague = () => $('#ctsScope').value === 'league';
+const ctsPool = () => fr.data.players.filter(p => p.contract && (ctsLeague() || p.team === fr.team));
+function openContracts() { if (!fr.data) return; $('#ctsYears').innerHTML = ctYearOpts(10); renderContracts(); openModal('#contractsModal'); }
+function renderContracts() {
+  const league = ctsLeague(), t = fr.data.teams.find(x => x.index === fr.team);
+  $('#ctsTitle').textContent = league ? 'Contracts · whole league' : `Contracts · ${t?.city ?? ''} ${t?.name ?? ''}`;
+  const list = ctsPool().sort((a, b) => b.ovr - a.ovr), shown = list.slice(0, league ? 300 : 120);
+  $('#ctsList').innerHTML = shown.map(p => {
+    const c = ctNow(p), ed = !!fr.edits.players[p.row]?.contract;
+    return `<div class="ctsrow ${ed ? 'edited' : ''}" data-ctrow="${p.row}">
+      <div><b>${esc(p.first)} ${esc(p.last)}</b><small>${esc(p.position)} · ${p.ovr} OVR · age ${p.age}${league ? ' · ' + esc(fr.data.teams.find(x => x.index === p.team)?.abbr || '') : ''}${c.noTrade ? ' · no-trade' : ''}${c.guaranteed ? ' · guaranteed' : ''}</small></div>
+      <select class="input" data-cty>${ctYearOpts(c.years)}</select>
+      <input class="input" data-cts type="number" min="0.3" max="163" step="0.25" value="${(c.salary / 100).toFixed(2)}" title="Sets every year to this salary">
+      <input class="input" data-ctb type="number" min="0" max="163" step="0.25" value="${(c.bonus / 100).toFixed(2)}">
+      <span>${money(ctTotal(c))}</span><span>${money(c.salary + c.bonus)}</span>
+      <button class="btn" data-ctopen title="Year by year">Edit</button>
+    </div>`;
+  }).join('') || '<div class="empty-state">No contracts here.</div>';
+  const pay = list.reduce((s, p) => { const c = ctNow(p); return s + c.salary + c.bonus; }, 0), n = list.filter(p => fr.edits.players[p.row]?.contract).length;
+  $('#ctsFoot').innerHTML = `${list.length} contracts · cap hits this year ${money(pay)} · ${n} changed${list.length > shown.length ? ` · showing the top ${shown.length}; the buttons apply to all ${list.length}` : ''}. A salary typed here sets every year of that deal.`;
+}
+// table edits: years, one salary for every year, first-year bonus
+$('#ctsList').addEventListener('change', e => {
+  const row = e.target.closest('[data-ctrow]'); if (!row) return;
+  const p = frPlayers.get(Number(row.dataset.ctrow)), c0 = ctNow(p);
+  let s = c0.schedule;
+  if (e.target.matches('[data-cty]')) s = ctLength(c0, Number(e.target.value));
+  if (e.target.matches('[data-cts]')) { const v = Number(e.target.value) * 100; if (!(v >= 30)) { toast('Salary must be at least $0.3M', true); return renderContracts(); } s = s.map(y => ({ ...y, salary: v })); }
+  if (e.target.matches('[data-ctb]')) s = s.map((y, i) => i ? y : { ...y, bonus: Number(e.target.value) * 100 });
+  setContractEdit(p, ctMake(s, c0.noTrade, c0.guaranteed)); saveFr(); renderContracts(); renderFranchise(true);
+});
+$('#ctsList').addEventListener('click', e => { const b = e.target.closest('[data-ctopen]'); if (b) { const p = frPlayers.get(Number(b.closest('[data-ctrow]').dataset.ctrow)); closeAll(); openContract(p); } });
+$('#ctsScope').onchange = renderContracts;
+// roughly what a player of this overall earns ($10K units): near the minimum under 70, about $45M a year at 99
+const ctByOvr = ovr => Math.round(CT_MIN + Math.pow(Math.max(0, ovr - 60) / 39, 2.6) * 4500);
+document.querySelector('#contractsModal .ctsbar').addEventListener('click', e => {
+  const b = e.target.closest('[data-cq]'); if (!b) return;
+  const op = b.dataset.cq, pool = ctsPool();
+  if (op === 'undo') { for (const p of pool) setContractEdit(p, null); saveFr(); renderContracts(); renderFranchise(true); return toast('Contract edits undone'); }
+  const custom = Number($('#ctsSalary').value) * 100;
+  if (op === 'custom' && !(custom >= 30)) return toast('Enter a salary of at least $0.3M a year', true);
+  let label = '';
+  for (const p of pool) {
+    const c0 = ctNow(p); let s = c0.schedule, ntc = c0.noTrade, g = c0.guaranteed;
+    if (/^len\d+$/.test(op)) { const n = Number(op.slice(3)); s = ctLength(c0, n); label = `made ${n}-year deals`; }
+    else if (op === 'ext1' || op === 'ext3') { s = ctLength(c0, Math.min(CT_MAX, s.length + (op === 'ext1' ? 1 : 3))); label = 'extended'; }
+    else if (op === 'min') { s = s.map(() => ({ salary: CT_MIN, bonus: 0 })); label = `set to the league minimum (${money(CT_MIN)})`; }
+    else if (op === 'half' || op === 'double') { const k = op === 'half' ? 0.5 : 2; s = s.map(y => ({ salary: y.salary * k, bonus: y.bonus * k })); label = op === 'half' ? 'cut in half' : 'doubled'; }
+    else if (op === 'ovr') { s = s.map(() => ({ salary: ctByOvr(p.ovr), bonus: 0 })); label = 'paid by overall'; }
+    else if (op === 'nobonus') { s = s.map(y => ({ ...y, bonus: 0 })); label = 'cleared of bonuses'; }
+    else if (op === 'guar') { g = true; label = 'fully guaranteed'; }
+    else if (op === 'ntc' || op === 'ntcoff') { ntc = op === 'ntc'; label = ntc ? 'given no-trade clauses' : 'cleared of no-trade clauses'; }
+    else if (op === 'custom') { const n = Number($('#ctsYears').value); s = Array.from({ length: n }, () => ({ salary: custom, bonus: 0 })); label = `set to ${n} year${n === 1 ? '' : 's'} at ${money(custom)}`; }
+    setContractEdit(p, ctMake(s, ntc, g));
+  }
+  saveFr(); renderContracts(); renderFranchise(true); Sound.ting();
+  toast(`${pool.length} contract${pool.length === 1 ? '' : 's'} ${label}`);
+});
 function frQuick(op) {
+  if (op === 'contracts') return openContracts();
   const squad = fr.data.players.filter(p => p.team === fr.team), staff = fr.data.coaches.filter(c => c.team === fr.team);
   if (op === 'xf' || op === 'ss') { for (const p of squad) setDev(p, op === 'xf' ? 3 : 2); toast(`${squad.length} players set to ${op === 'xf' ? 'X-Factor' : 'Superstar'}`); if (op === 'xf') Sound.stinger(); }
   else if (op === 'plat') { let n = 0; for (const p of squad) for (const a of p.abilities) { setRank(a, 'Platinum'); n++; } toast(n ? `${n} abilities set to Platinum` : 'No abilities on this team'); if (n) Sound.ting(); }

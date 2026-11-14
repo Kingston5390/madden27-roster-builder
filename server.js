@@ -18,7 +18,7 @@ const args = process.argv.slice(2);
 const flag = name => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : undefined; };
 const PORT = Number(flag('--port') ?? 8790);
 const OPEN = !args.includes('--no-open');
-const VERSION = '1.2.7'; // keep in step with package.json
+const VERSION = '1.2.8'; // keep in step with package.json
 const APP_DIR = path.join(process.env.APPDATA || os.homedir(), 'RosterBuilder');
 
 // The exe has no console window, so what it would print also goes to a log file (newest run at the bottom)
@@ -274,6 +274,12 @@ const server = http.createServer(async (req, res) => {
       const players = summarizeLegends(path.join(savesDir, file), base);
       prefetchAll(players.map(p => `${p.PFNA} ${p.PLNA}`)).catch(() => {}); // photos for every franchise's legends
       return send(res, 200, JSON.stringify({ file, players, photos: cachedPhotos() }));
+    }
+    if (req.method === 'POST' && url.pathname === '/api/export-check') { // jersey number conflicts, before anything is written
+      const body = await readBody(req);
+      const legends = legendsFile();
+      const result = exportRoster(path.join(savesDir, path.basename(body.base)), path.join(require('node:os').tmpdir(), `rb-check-${process.pid}-${Date.now()}`), { ...body, check: true, legendsFile: legends && path.join(savesDir, legends) });
+      return send(res, 200, JSON.stringify(result));
     }
     if (req.method === 'POST' && url.pathname === '/api/export') {
       const body = await readBody(req);
