@@ -75,7 +75,7 @@ A free desktop app for editing **Madden NFL 27** rosters, draft classes and fran
 - **Development traits** that stick in Franchise: Normal, Star, Superstar or X-Factor for any player, or the whole team at once.
 - **Ability ranks**: Bronze, Silver, Gold or Platinum for each ability a player has.
 - **Contracts**: edit any player's deal year by year (salary and bonus each year, up to 10 years, guaranteed, no-trade clause), or open **💰 Contracts** to edit a whole team or the league in one table with bulk buttons: all 10-, 7-, 5- or 1-year deals, +1/+3 years, league minimum, half price, double, pay by overall, no bonuses, all guaranteed, no-trade on/off, or a custom length and salary. Madden stores bonuses for the first 7 contract years only.
-- **Start at a real week**: pick a week of the current NFL season and get a new save with every real result before it. Either sim to that week in Madden (Madden plays each game with its real winner) or open the save already at that week with real scores, records and standings written in (experimental; needs a save from the regular season).
+- **Start at a real week**: pick a week of the current NFL season and get a new save with every real result before it. Load it and sim to that week in Madden: Madden plays each earlier game with its real winner, so records, standings, box scores, stats and the playoffs all work.
 - **Coaches**: raise your head coach and coordinators to level 49 and unlock every talent tier. Vacant jobs are shown as vacant.
 - Saves a new `CAREER-` file, then reads it back to check every change. Load it in Madden from Franchise → Load.
 
@@ -98,9 +98,9 @@ The All-time team button and legend search read legends from any roster in your 
 
 ## Security & verification
 
-**Scan result (v1.2.8):** Microsoft Defender Antivirus, engine 1.1.26100.4, signatures 1.463.300.0, custom scan of `RosterBuilder.exe`: **no threats found**.
+**Scan result (v1.2.9):** Microsoft Defender Antivirus, engine 1.1.26100.4, signatures 1.463.300.0, custom scan of `RosterBuilder.exe`: **no threats found**.
 
-**SHA-256 (v1.2.8):** `bd516f0401c281c83847d6cecc94f1aefde2fa61ec361d0be5503dc8efc5457d`
+**SHA-256 (v1.2.9):** `9020cb9d4ae1251ab654952384aa8326488f994e7a117ea359dcd5d04faf32c6`
 
 Each release lists its own scan result and checksum.
 

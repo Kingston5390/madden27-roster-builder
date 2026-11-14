@@ -9,7 +9,7 @@ const { summarize, summarizeLegends, exportRoster } = require('./lib/roster');
 const { leagueChaos, applyTrades } = require('./lib/league');
 const { playerPhotos, prospectPhotos, prefetchAll, cachedPhotos } = require('./lib/photos');
 const { readDraftClass, writeDraftClass } = require('./lib/draft');
-const { summarizeFranchise, applyFranchiseEdits, setRealWinners, jumpToRealWeek } = require('./lib/franchise');
+const { summarizeFranchise, applyFranchiseEdits, setRealWinners } = require('./lib/franchise');
 const { fetchRealResults } = require('./lib/season');
 const { searchCollegePlayers } = require('./lib/college');
 const { fetchNfl, syncRoster, normName } = require('./lib/sync');
@@ -18,7 +18,7 @@ const args = process.argv.slice(2);
 const flag = name => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : undefined; };
 const PORT = Number(flag('--port') ?? 8790);
 const OPEN = !args.includes('--no-open');
-const VERSION = '1.2.8'; // keep in step with package.json
+const VERSION = '1.2.9'; // keep in step with package.json
 const APP_DIR = path.join(process.env.APPDATA || os.homedir(), 'RosterBuilder');
 
 // The exe has no console window, so what it would print also goes to a log file (newest run at the bottom)
@@ -347,10 +347,10 @@ const server = http.createServer(async (req, res) => {
       if (!name) throw new Error('Enter a name for the new franchise save');
       const week = Math.max(1, Math.min(18, Math.round(Number(body.week))));
       const games = await fetchRealResults(Number(body.year));
-      // sim: real winners as force-wins (Madden plays the weeks). open: real results written in, season moved to the week
-      const run = body.mode === 'open' ? jumpToRealWeek : setRealWinners;
-      const result = await run(path.join(savesDir, path.basename(body.base)), path.join(savesDir, 'CAREER-' + name), games, week);
-      return send(res, 200, JSON.stringify({ ...result, week, mode: body.mode === 'open' ? 'open' : 'sim' }));
+      // real winners as Madden's force-wins; Madden then plays the weeks itself. (Writing results in and moving the season ahead
+      // was removed in 1.2.9: Madden stopped recording games and scheduling the playoffs in saves made that way.)
+      const result = await setRealWinners(path.join(savesDir, path.basename(body.base)), path.join(savesDir, 'CAREER-' + name), games, week);
+      return send(res, 200, JSON.stringify({ ...result, week, mode: 'sim' }));
     }
     if (req.method === 'POST' && url.pathname === '/api/franchise-export') {
       const body = await readBody(req);
